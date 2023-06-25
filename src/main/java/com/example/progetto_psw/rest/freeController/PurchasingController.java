@@ -29,9 +29,11 @@ public class PurchasingController {
     @ResponseStatus(code = HttpStatus.OK)
     public ResponseEntity create(@RequestBody  Purchase purchase) { // è buona prassi ritornare l'oggetto inserito
         try {
-            return new ResponseEntity<>(purchasingService.addPurchaseAle(purchase), HttpStatus.OK);
+            return new ResponseEntity<>(purchasingService.addPurchase(purchase), HttpStatus.OK);
         } catch (QuantityProductUnavailableException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product quantity unavailable!", e); // realmente il messaggio dovrebbe essrere più esplicativo (es. specificare il prodotto di cui non vi è disponibilità)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product quantity unavailable!", e.getCause()); // realmente il messaggio dovrebbe essrere più esplicativo (es. specificare il prodotto di cui non vi è disponibilità)
+        } catch (IllegalArgumentException e){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Id del prodotto non valido");
         }
     }
 

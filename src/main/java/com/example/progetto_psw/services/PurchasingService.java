@@ -39,7 +39,7 @@ public class PurchasingService {
 
     //L'oggetto purchase (result) vine ricevuto dal client al server
     @Transactional()
-    public Purchase addPurchaseAle(Purchase result) throws QuantityProductUnavailableException {
+    public Purchase addPurchase(Purchase result) throws QuantityProductUnavailableException {
         for ( ProductInPurchase pip : result.getProductsInPurchase() ) {
             int idProd = pip.getProduct().getId();
             Optional<Product> optionalProd = productRepository.findById(idProd);
