@@ -3,6 +3,7 @@ package com.example.progetto_psw.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.util.List;
@@ -31,7 +32,8 @@ public class User {
     private int id;
 
     @Basic
-    @Column(name = "code", length = 70)
+    @Column(name = "code", length = 20)
+    @Size(min = 20, max = 20)
     private String code;
 
     @Basic

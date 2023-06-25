@@ -37,7 +37,9 @@ public class ProductsController {
     }
 
     @GetMapping("/paged")
-    public ResponseEntity getAll(@RequestParam(value = "pageNumber", defaultValue = "0") int pageNumber, @RequestParam(value = "pageSize", defaultValue = "10") int pageSize, @RequestParam(value = "sortBy", defaultValue = "id") String sortBy) {
+    public ResponseEntity getAll(@RequestParam(value = "pageNumber", defaultValue = "0") int pageNumber,
+                                 @RequestParam(value = "pageSize", defaultValue = "10") int pageSize,
+                                 @RequestParam(value = "sortBy", defaultValue = "id") String sortBy) {
         List<Product> result = productService.showAllProducts(pageNumber, pageSize, sortBy); //gli oggetti che vengono restituiti sono convertiti da spring automaticamente in json
         if ( result.size() <= 0 ) {
             return new ResponseEntity<>(new ResponseMessage("No results!"), HttpStatus.OK);

@@ -28,6 +28,23 @@ public class PurchasingController {
     @PostMapping
     @ResponseStatus(code = HttpStatus.OK)
     public ResponseEntity create(@RequestBody  Purchase purchase) { // è buona prassi ritornare l'oggetto inserito
+        /*L'oggetto sarà nella seguente forma:
+
+            {
+              "buyer": 10,
+              "productsInPurchase": [
+                {
+                  "quantity": 1,
+                  "product": 6
+                },
+                {
+                  "quantity": 1,
+                  "product": 4
+                }
+              ]
+            }
+
+         */
         try {
             return new ResponseEntity<>(purchasingService.addPurchase(purchase), HttpStatus.OK);
         } catch (QuantityProductUnavailableException e) {
@@ -47,7 +64,9 @@ public class PurchasingController {
     }
 
     @GetMapping("/{user}/{startDate}/{endDate}")
-    public ResponseEntity getPurchasesInPeriod(@PathVariable("user") User user, @PathVariable("startDate") @DateTimeFormat(pattern = "dd-MM-yyyy") Date start, @PathVariable("endDate") @DateTimeFormat(pattern = "dd-MM-yyyy") Date end) {
+    public ResponseEntity getPurchasesInPeriod(@PathVariable("user") User user,
+                                               @PathVariable("startDate") @DateTimeFormat(pattern = "dd-MM-yyyy") Date start,
+                                               @PathVariable("endDate") @DateTimeFormat(pattern = "dd-MM-yyyy") Date end) {
         try {
             List<Purchase> result = purchasingService.getPurchasesByUserInPeriod(user, start, end);
             if ( result.size() <= 0 ) {

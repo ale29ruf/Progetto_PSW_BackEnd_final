@@ -13,6 +13,7 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQLDialect #usato per convertire le query da JPQL in quelle specifiche di postgres
     hibernate:
       ddl-auto: update
+    show-sql: true
 
 
 
