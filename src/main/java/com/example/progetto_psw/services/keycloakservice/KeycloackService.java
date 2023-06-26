@@ -38,18 +38,12 @@ public class KeycloackService {
     private String userName;
     private String password;
 
-    @Transactional(readOnly = false, propagation = Propagation.REQUIRED, rollbackFor = {UsernameUserAlreadyExistsException.class, MailUserAlreadyExistsException.class})
     public User addUser(User userE) throws MailUserAlreadyExistsException, UsernameUserAlreadyExistsException {
         email = userE.getEmail();
         userName = userE.getUsername();
         password = userE.getPassword();
 
-        if ( userRepository.existsByEmail(userE.getEmail()) ) {
-            throw new MailUserAlreadyExistsException();
-        }
-        if(userRepository.existsByUsername(userE.getUsername())){
-            throw new UsernameUserAlreadyExistsException();
-        }
+        User u = accountingService.verifyEmailUsernameUser(userE);
 
         Keycloak keycloak = KeycloakAccess.KEYCLOAK_ACCESS.getKeycloak();
 
@@ -85,16 +79,11 @@ public class KeycloackService {
 
         userResource.roles().clientLevel(app1Client.getId()).add(Arrays.asList(userClientRole));
 
-        return accountingService.verifyUser(userE);
+        return u;
     }
 
 
-
-    public UserResource removeUser(User userE) throws MailUserAlreadyExistsException, UsernameUserAlreadyExistsException {
-        // Delete User
-        //userResource.remove();
-        return null;
-    }
+    // TODO Implementare la rimozione di un utente sia lato server che su keycloak
 
 
 }

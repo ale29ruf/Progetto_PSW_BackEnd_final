@@ -32,7 +32,7 @@ public class AccountingService {
 
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED, rollbackFor = {UsernameUserAlreadyExistsException.class, MailUserAlreadyExistsException.class})
-    public User verifyUser(User user) throws MailUserAlreadyExistsException, UsernameUserAlreadyExistsException {
+    public User verifyEmailUsernameUser(User user) throws MailUserAlreadyExistsException, UsernameUserAlreadyExistsException {
         if ( userRepository.existsByEmail(user.getEmail()) ) {
             throw new MailUserAlreadyExistsException();
         }
