@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import support.authentication.Utils;
 
@@ -22,7 +23,13 @@ public class CheckController {
     @PreAuthorize("hasAnyAuthority('admin','prova')")
     public ResponseEntity check4(){
         return ResponseEntity.ok("SIA ADMIN CHE UTENTI PROVA "+
-                "\n"+ Utils.getPrincipal().getClaims());
+                "\n"+"Username: "+ Utils.getUsername()+"\nEmail: "+Utils.getEmail()+"\nRuoli: "+Utils.getRole());
+    }
+
+    @GetMapping("/provaUser")
+    @PreAuthorize("hasAuthority('user')")
+    public String home(@RequestParam(value = "someValue") int value) {
+        return "Welcome, " + Utils.getEmail() + " " + value + " !";
     }
 
 }
