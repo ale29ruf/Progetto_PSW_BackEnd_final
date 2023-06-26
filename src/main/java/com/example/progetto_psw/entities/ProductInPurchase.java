@@ -2,6 +2,7 @@ package com.example.progetto_psw.entities;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.annotation.Nonnull;
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -29,12 +30,14 @@ public class ProductInPurchase {
 
     @Basic
     @Column(name = "quantity", nullable = true)
+    @Nonnull
     private int quantity; //introduciamo questa entity proprio per poter specificare la quantità per ogni prodotto all'interno dello specifico ordine
 
     // TODO aggiungere eventualmente il prezzo (che potrebbe differire da quello del prodotto in Product con il passare del tempo)
 
     @ManyToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name = "product")
+    @Nonnull
     private Product product;
 
     public ProductInPurchase(Product product, int quantity){

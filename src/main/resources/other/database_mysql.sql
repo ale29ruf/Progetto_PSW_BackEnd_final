@@ -3,6 +3,7 @@ CREATE SEQUENCE user_seq;
 CREATE TABLE "user"
 (
     id               INTEGER DEFAULT NEXTVAL('user_seq') PRIMARY KEY,
+    username         VARCHAR(20),
     code             VARCHAR(70),
     first_name       VARCHAR(50),
     last_name        VARCHAR(50),

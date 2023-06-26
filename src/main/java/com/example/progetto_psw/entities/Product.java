@@ -2,8 +2,12 @@ package com.example.progetto_psw.entities;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.annotation.Nonnull;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
 import java.util.List;
 
@@ -22,7 +26,7 @@ public class Product {
     private int id;
 
     @Basic
-    @NonNull
+    @Nonnull
     @Column(name = "name", nullable = false, length = 20)
     private String name;
 

@@ -1,5 +1,4 @@
-package configuration;
-
+package com.example.progetto_psw.configurations;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -7,10 +6,8 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 
 import java.nio.charset.StandardCharsets;
 
-
 @Configuration
 public class EncodingConfiguration {
-
 
     @Bean
     public MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter() {
@@ -18,6 +15,4 @@ public class EncodingConfiguration {
         jsonConverter.setDefaultCharset(StandardCharsets.UTF_8);
         return jsonConverter;
     }
-
-
 }

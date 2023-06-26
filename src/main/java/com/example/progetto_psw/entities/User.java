@@ -2,9 +2,14 @@ package com.example.progetto_psw.entities;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.annotation.Nonnull;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Size;
-import lombok.*;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
 import java.util.List;
 
@@ -15,7 +20,7 @@ import java.util.List;
 @ToString
 @Entity
 @Table(name = "user", schema = "public", uniqueConstraints = {
-        @UniqueConstraint(columnNames = "email")})
+        @UniqueConstraint(columnNames = "email"),@UniqueConstraint(columnNames = "username")})
 public class User {
 
     /**
@@ -32,9 +37,14 @@ public class User {
     private int id;
 
     @Basic
+    @Column(name = "username", length = 10, nullable = false)
+    @Size(min = 7, max = 7)
+    private String username;
+
+    @Basic
     @Column(name = "code", length = 20)
     @Size(min = 20, max = 20)
-    private String code;
+    private String codFiscale;
 
     @Basic
     @Column(name = "first_name", length = 50)
@@ -49,8 +59,9 @@ public class User {
     private String telephoneNumber;
 
     @Basic
-    @NonNull
+    @Nonnull
     @Column(name = "email", nullable = false, length = 90)
+    @Email
     private String email;
 
     @Basic

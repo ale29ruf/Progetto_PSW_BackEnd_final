@@ -2,6 +2,13 @@ spring:
   application:
     name: Temp-Store
 
+  security:
+    oauth2:
+      resource-server:
+        jwt:
+          #Uno dei seguenti url serve per verificare l'autenticità del token ricevuto
+          jwk-set-uri: http://localhost:8180/realms/realm_prog/protocol/openid-connect/certs
+          issuer-uri: http://localhost:8180/realms/realm_prog
 
 #Configurazione dell'unità di persistenza
   datasource:
@@ -17,7 +24,10 @@ spring:
 
 
 
-server:
+
+
+
+#server:
   #ssl:
   #key-store-password: password_certificate
   #key-store-type: PKCS12
@@ -28,9 +38,9 @@ server:
   #enabled: true
   #key-store: C:\Users\Stefano\Desktop\sslcert1\certificate.p12
   #port: 9090
-  compression:
-    enabled: 'true'
-  port: '8080'
+  #compression:
+  #  enabled: 'true'
+  #port: '8080'
 
   #security:
   #require-ssl: 'true'

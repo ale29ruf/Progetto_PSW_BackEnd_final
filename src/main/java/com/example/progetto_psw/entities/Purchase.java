@@ -1,12 +1,13 @@
 package com.example.progetto_psw.entities;
 
 
+import jakarta.annotation.Nonnull;
 import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import org.hibernate.annotations.CreationTimestamp;
 
 import java.util.Date;
 import java.util.List;
@@ -32,6 +33,7 @@ public class Purchase {
 
     @ManyToOne
     @JoinColumn(name = "buyer")
+    @Nonnull
     private User buyer;
 
     @OneToMany(mappedBy = "purchase", cascade = CascadeType.MERGE) //la propagazione avviene solo per l'operazione di merge() sulla entity padre

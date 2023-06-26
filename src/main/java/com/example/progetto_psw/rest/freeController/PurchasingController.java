@@ -31,7 +31,7 @@ public class PurchasingController {
         /*L'oggetto sarà nella seguente forma:
 
             {
-              "buyer": 10,
+              "buyer": ale.ciao@gmail.com,
               "productsInPurchase": [
                 {
                   "quantity": 1,
@@ -51,6 +51,8 @@ public class PurchasingController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product quantity unavailable!", e.getCause()); // realmente il messaggio dovrebbe essrere più esplicativo (es. specificare il prodotto di cui non vi è disponibilità)
         } catch (IllegalArgumentException e){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Id del prodotto non valido");
+        } catch (UserNotFoundException e){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email utente non trovata");
         }
     }
 
