@@ -48,20 +48,20 @@ public class PurchasingController {
         try {
             return new ResponseEntity<>(purchasingService.addPurchase(purchase), HttpStatus.OK);
         } catch (QuantityProductUnavailableException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product quantity unavailable!", e.getCause()); // realmente il messaggio dovrebbe essrere più esplicativo (es. specificare il prodotto di cui non vi è disponibilità)
+            return new ResponseEntity<>(new ResponseMessage("Product quantity unavailable!"), HttpStatus.BAD_REQUEST); // realmente il messaggio dovrebbe essrere più esplicativo (es. specificare il prodotto di cui non vi è disponibilità)
         } catch (IllegalArgumentException e){
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Id del prodotto non valido");
+            return new ResponseEntity<>(new ResponseMessage("Id del prodotto non valido"),HttpStatus.BAD_REQUEST);
         } catch (UserNotFoundException e){
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email utente non trovata");
+            return new ResponseEntity<>(new ResponseMessage("Email utente non trovata"),HttpStatus.BAD_REQUEST);
         }
     }
 
     @GetMapping("/{user}")
-    public List<Purchase> getPurchases(@RequestBody  User user) { //l'utente non deve essere passato come parametro ma l'autenticazione deve avvenire tramite token
+    public ResponseEntity getPurchases(@RequestBody  User user) { //l'utente non deve essere passato come parametro ma l'autenticazione deve avvenire tramite token
         try {
-            return purchasingService.getPurchasesByUser(user);
+            return new ResponseEntity<>(purchasingService.getPurchasesByUser(user), HttpStatus.OK);
         } catch (UserNotFoundException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User not found!", e);
+            return new ResponseEntity<>(new ResponseMessage("User not found!"), HttpStatus.BAD_REQUEST);
         }
     }
 

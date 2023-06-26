@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import support.exceptions.MailUserAlreadyExistsException;
+import support.exceptions.UsernameUserAlreadyExistsException;
 
 import java.util.List;
 
@@ -28,6 +29,18 @@ public class AccountingService {
         return userRepository.save(user);
     }
     //In realtà la registrazione la facciamo con un server terzo e mantenuta con un token JWT.
+
+
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED, rollbackFor = {UsernameUserAlreadyExistsException.class, MailUserAlreadyExistsException.class})
+    public User verifyUser(User user) throws MailUserAlreadyExistsException, UsernameUserAlreadyExistsException {
+        if ( userRepository.existsByEmail(user.getEmail()) ) {
+            throw new MailUserAlreadyExistsException();
+        }
+        if(userRepository.existsByUsername(user.getUsername())){
+            throw new UsernameUserAlreadyExistsException();
+        }
+        return userRepository.save(user);
+    }
 
 
     //restituisce la lista di tutti gli utenti

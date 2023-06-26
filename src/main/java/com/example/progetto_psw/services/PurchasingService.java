@@ -44,7 +44,7 @@ public class PurchasingService {
         for ( ProductInPurchase pip : result.getProductsInPurchase() ) {
             pip.setPurchase(result);
             ProductInPurchase justAdded = productInPurchaseRepository.save(pip);
-            entityManager.refresh(justAdded);
+            entityManager.refresh(justAdded); //necessario dato che non c'è propagazione di refresh in ProductInPurchase
             Product product = justAdded.getProduct();
             int newQuantity = product.getQuantity() - pip.getQuantity();
             if ( newQuantity < 0 )  throw new QuantityProductUnavailableException("Id: "+product.getId());

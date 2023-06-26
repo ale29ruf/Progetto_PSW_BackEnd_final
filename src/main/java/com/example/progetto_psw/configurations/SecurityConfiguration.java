@@ -25,7 +25,12 @@ public class SecurityConfiguration{
     public SecurityFilterChain configure(HttpSecurity http) throws Exception{
        http
                .csrf((csrf)-> csrf.disable()).authorizeHttpRequests((auth)->
-               auth.requestMatchers("/check/**").permitAll()
+               auth
+                       .requestMatchers("/check/**").permitAll()
+                       .requestMatchers("/users/**").permitAll()
+                       .requestMatchers("/purchases/**").permitAll()
+                       .requestMatchers("/products/**").permitAll()
+                       .requestMatchers("/manage/**").permitAll()
                        .anyRequest().authenticated()
                 )
                .oauth2ResourceServer().jwt().jwtAuthenticationConverter(new JwtAuthenticationConverter());

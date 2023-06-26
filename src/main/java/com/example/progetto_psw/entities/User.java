@@ -39,11 +39,13 @@ public class User {
     @Basic
     @Column(name = "username", length = 10, nullable = false)
     @Size(min = 7, max = 7)
+    @Nonnull
     private String username;
 
     @Basic
     @Column(name = "code", length = 20)
     @Size(min = 20, max = 20)
+    @Nonnull
     private String codFiscale;
 
     @Basic
