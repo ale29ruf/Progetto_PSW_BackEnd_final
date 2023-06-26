@@ -14,8 +14,6 @@ import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 import support.exceptions.MailUserAlreadyExistsException;
 import support.exceptions.UsernameUserAlreadyExistsException;
 import support.keyclock.KeycloakAccess;

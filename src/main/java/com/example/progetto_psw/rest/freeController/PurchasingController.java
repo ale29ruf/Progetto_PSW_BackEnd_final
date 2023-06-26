@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import support.ResponseMessage;
@@ -27,7 +28,7 @@ public class PurchasingController {
 
     @PostMapping
     @ResponseStatus(code = HttpStatus.OK)
-    public ResponseEntity create(@RequestBody  Purchase purchase) { // è buona prassi ritornare l'oggetto inserito
+    public ResponseEntity createPurchase(@RequestBody  Purchase purchase) { // è buona prassi ritornare l'oggetto inserito
         /*L'oggetto sarà nella seguente forma:
 
             {
@@ -56,6 +57,8 @@ public class PurchasingController {
         }
     }
 
+    // TODO modificare il seguente metodo (l'utente va preso dal token)
+    @PreAuthorize("hasAuthority('admin')")
     @GetMapping("/{user}")
     public ResponseEntity getPurchases(@RequestBody  User user) { //l'utente non deve essere passato come parametro ma l'autenticazione deve avvenire tramite token
         try {
@@ -65,6 +68,7 @@ public class PurchasingController {
         }
     }
 
+    // TODO modificare il seguente metodo (l'utente va preso dal token)
     @GetMapping("/{user}/{startDate}/{endDate}")
     public ResponseEntity getPurchasesInPeriod(@PathVariable("user") User user,
                                                @PathVariable("startDate") @DateTimeFormat(pattern = "dd-MM-yyyy") Date start,
