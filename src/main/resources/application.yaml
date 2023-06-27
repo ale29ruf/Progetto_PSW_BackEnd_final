@@ -2,6 +2,7 @@ spring:
   application:
     name: Temp-Store
 
+
   security:
     oauth2:
       resource-server:
@@ -9,6 +10,7 @@ spring:
           #Uno dei seguenti url serve per verificare l'autenticità del token ricevuto
           jwk-set-uri: http://localhost:8180/realms/realm_prog/protocol/openid-connect/certs
           issuer-uri: http://localhost:8180/realms/realm_prog
+
 
 #Configurazione dell'unità di persistenza
   datasource:
@@ -23,24 +25,18 @@ spring:
     show-sql: true
 
 
+server:
+  ssl:
+    key-store-password: computer
+    key-store-type: PKCS12
+    enabled: true
+    key-store: C:\Users\aless\Desktop\Progetto_PSW\src\main\resources\keytool\localhost-ssl.p12
+  port: 9190
+
+  compression:
+    enabled: 'true'
 
 
-#server:
-  #ssl:
-  #key-store-password: password_certificate
-  #key-store-type: PKCS12
-  #key-store: /home/debian/ssl-cert/certificate.p12
 
-  #key-store-password: stefano
-  #key-store-type: PKCS12
-  #enabled: true
-  #key-store: C:\Users\Stefano\Desktop\sslcert1\certificate.p12
-  #port: 9090
-  #compression:
-  #  enabled: 'true'
-  #port: '8080'
-
-  #security:
-  #require-ssl: 'true'
 
 
