@@ -28,7 +28,7 @@ public class SecurityConfiguration{
                auth
                        .requestMatchers("/check/**").permitAll()
                        .requestMatchers("/users/**").permitAll()
-                       .requestMatchers("/purchases/**").permitAll()
+                       .requestMatchers("/purchase/**").permitAll()
                        .requestMatchers("/products/**").permitAll()
                        .requestMatchers("/manage/**").permitAll()
                        .anyRequest().authenticated()

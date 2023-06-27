@@ -20,9 +20,9 @@ public class CheckController {
     }
 
     @GetMapping("/prova2")
-    @PreAuthorize("hasAnyAuthority('admin','prova')")
+    @PreAuthorize("hasAnyAuthority('admin','user')")
     public ResponseEntity check4(){
-        return ResponseEntity.ok("SIA ADMIN CHE UTENTI PROVA "+
+        return ResponseEntity.ok("SIA ADMIN CHE UTENTI "+
                 "\n"+"Username: "+ Utils.getUsername()+"\nEmail: "+Utils.getEmail()+"\nRuoli: "+Utils.getRole());
     }
 

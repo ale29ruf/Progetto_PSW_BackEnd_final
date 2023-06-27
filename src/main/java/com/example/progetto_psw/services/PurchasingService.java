@@ -7,6 +7,7 @@ import com.example.progetto_psw.entities.ProductInPurchase;
 import com.example.progetto_psw.entities.Purchase;
 import com.example.progetto_psw.entities.User;
 import com.example.progetto_psw.repositories.ProductInPurchaseRepository;
+import com.example.progetto_psw.repositories.ProductRepository;
 import com.example.progetto_psw.repositories.PurchaseRepository;
 import com.example.progetto_psw.repositories.UserRepository;
 import jakarta.persistence.EntityManager;
@@ -34,14 +35,21 @@ public class PurchasingService {
     private UserRepository userRepository;
     @Autowired
     private EntityManager entityManager;
+    @Autowired
+    private ProductRepository productRepository;
 
 
     @Transactional(readOnly = false, isolation = Isolation.REPEATABLE_READ, propagation = Propagation.NESTED,
             rollbackFor = {QuantityProductUnavailableException.class,UserNotFoundException.class})
     public Purchase addPurchase( @Valid Purchase purchase) throws QuantityProductUnavailableException, UserNotFoundException {
-        if(!userRepository.existsByEmail(purchase.getBuyer().getEmail())) throw new UserNotFoundException();
+        if(!userRepository.existsByUsername(purchase.getBuyer().getUsername())) throw new UserNotFoundException();
+
+        User u = userRepository.findByUsername(purchase.getBuyer().getUsername()).get(0);
+        purchase.setBuyer(u);
         Purchase result = purchaseRepository.save(purchase);
+
         for ( ProductInPurchase pip : result.getProductsInPurchase() ) {
+            if(!productRepository.existsById(pip.getProduct().getId())) throw new IllegalArgumentException("Id "+pip.getProduct().getId()+" non esistente");
             pip.setPurchase(result);
             ProductInPurchase justAdded = productInPurchaseRepository.save(pip);
             entityManager.refresh(justAdded); //necessario dato che non c'è propagazione di refresh in ProductInPurchase
@@ -57,21 +65,23 @@ public class PurchasingService {
 
     @Transactional(propagation = Propagation.REQUIRED)
     public List<Purchase> getPurchasesByUser(User user) throws UserNotFoundException {
-        if ( !userRepository.existsById(user.getId()) ) {
+        if ( !userRepository.existsByUsername(user.getUsername()) ) {
             throw new UserNotFoundException();
         }
-        return purchaseRepository.findByBuyer(user);
+        User u = userRepository.findByUsername(user.getUsername()).get(0);
+        return purchaseRepository.findByBuyer(u);
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
     public List<Purchase> getPurchasesByUserInPeriod(User user, Date startDate, Date endDate) throws UserNotFoundException, DateWrongRangeException {
-        if ( !userRepository.existsById(user.getId()) ) {
+        if ( !userRepository.existsByUsername(user.getUsername()) ) {
             throw new UserNotFoundException();
         }
         if ( startDate.compareTo(endDate) >= 0 ) {
             throw new DateWrongRangeException();
         }
-        return purchaseRepository.findByBuyerInPeriod(startDate, endDate, user);
+        User u = userRepository.findByUsername(user.getUsername()).get(0);
+        return purchaseRepository.findByBuyerInPeriod(startDate, endDate, u);
     }
 
     @Transactional(propagation = Propagation.REQUIRED)

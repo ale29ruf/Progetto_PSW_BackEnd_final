@@ -24,12 +24,10 @@ import java.util.List;
 public class User {
 
     /**
-     * Gli utenti sono identificati dalla mail.
+     * Gli utenti sono identificati da mail e username.
      * @JsonIgnore viene utilizzata per indicare a una libreria di serializzazione (ad esempio Jackson) d'ignorare una specifica proprietà di un oggetto durante la conversione da oggetto a JSON o viceversa.
      * @Basic significa che un attributo deve essere persistente
      */
-
-    // TODO Aggiungere le annotazioni che verranno usate poi per la validazione(attraverso @Valid) degli oggetti che vengono passati come argomento a un metodo o come parametro di una richiesta
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -79,10 +77,6 @@ public class User {
 
     public User(int id){
         this.id = id;
-    }
-
-    public User(String email){
-        this.email = email;
     }
 
     public User() {

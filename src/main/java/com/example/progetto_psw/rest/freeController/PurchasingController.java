@@ -4,6 +4,7 @@ package com.example.progetto_psw.rest.freeController;
 import com.example.progetto_psw.entities.Purchase;
 import com.example.progetto_psw.entities.User;
 import com.example.progetto_psw.services.PurchasingService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -12,6 +13,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import support.ResponseMessage;
+import support.authentication.Utils;
 import support.exceptions.DateWrongRangeException;
 import support.exceptions.QuantityProductUnavailableException;
 import support.exceptions.UserNotFoundException;
@@ -21,46 +23,35 @@ import java.util.List;
 
 
 @RestController
-@RequestMapping("/purchases")
+@RequestMapping("/purchase")
 public class PurchasingController {
     @Autowired
     private PurchasingService purchasingService;
 
+    @PreAuthorize("hasAuthority('user')")
     @PostMapping
     @ResponseStatus(code = HttpStatus.OK)
-    public ResponseEntity createPurchase(@RequestBody  Purchase purchase) { // è buona prassi ritornare l'oggetto inserito
-        /*L'oggetto sarà nella seguente forma:
-
-            {
-              "buyer": ale.ciao@gmail.com,
-              "productsInPurchase": [
-                {
-                  "quantity": 1,
-                  "product": 6
-                },
-                {
-                  "quantity": 1,
-                  "product": 4
-                }
-              ]
-            }
-
-         */
+    public ResponseEntity createPurchase(@RequestBody Purchase purchase) { // è buona prassi ritornare l'oggetto inserito
+        User u = new User();
+        u.setUsername(Utils.getUsername());
+        purchase.setBuyer(u);
         try {
             return new ResponseEntity<>(purchasingService.addPurchase(purchase), HttpStatus.OK);
         } catch (QuantityProductUnavailableException e) {
             return new ResponseEntity<>(new ResponseMessage("Product quantity unavailable!"), HttpStatus.BAD_REQUEST); // realmente il messaggio dovrebbe essrere più esplicativo (es. specificare il prodotto di cui non vi è disponibilità)
         } catch (IllegalArgumentException e){
-            return new ResponseEntity<>(new ResponseMessage("Id del prodotto non valido"),HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ResponseMessage(e.getMessage()),HttpStatus.BAD_REQUEST);
         } catch (UserNotFoundException e){
-            return new ResponseEntity<>(new ResponseMessage("Email utente non trovata"),HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ResponseMessage("Username utente non trovata"),HttpStatus.BAD_REQUEST);
         }
     }
 
-    // TODO modificare il seguente metodo (l'utente va preso dal token)
-    @PreAuthorize("hasAuthority('admin')")
-    @GetMapping("/{user}")
-    public ResponseEntity getPurchases(@RequestBody  User user) { //l'utente non deve essere passato come parametro ma l'autenticazione deve avvenire tramite token
+
+    @PreAuthorize("hasAuthority('user')")
+    @GetMapping("/purchases")
+    public ResponseEntity getPurchases() { //l'utente non deve essere passato come parametro ma l'autenticazione deve avvenire tramite token
+        User user = new User();
+        user.setUsername(Utils.getUsername());
         try {
             return new ResponseEntity<>(purchasingService.getPurchasesByUser(user), HttpStatus.OK);
         } catch (UserNotFoundException e) {
@@ -68,21 +59,32 @@ public class PurchasingController {
         }
     }
 
-    // TODO modificare il seguente metodo (l'utente va preso dal token)
+    @PreAuthorize("hasAuthority('user')")
     @GetMapping("/{user}/{startDate}/{endDate}")
-    public ResponseEntity getPurchasesInPeriod(@PathVariable("user") User user,
-                                               @PathVariable("startDate") @DateTimeFormat(pattern = "dd-MM-yyyy") Date start,
+    public ResponseEntity getPurchasesInPeriod(@PathVariable("startDate") @DateTimeFormat(pattern = "dd-MM-yyyy") Date start,
                                                @PathVariable("endDate") @DateTimeFormat(pattern = "dd-MM-yyyy") Date end) {
         try {
-            List<Purchase> result = purchasingService.getPurchasesByUserInPeriod(user, start, end);
+            User u = new User();
+            u.setUsername(Utils.getUsername());
+            List<Purchase> result = purchasingService.getPurchasesByUserInPeriod(u, start, end);
             if ( result.size() <= 0 ) {
                 return new ResponseEntity<>(new ResponseMessage("No results!"), HttpStatus.OK);
             }
             return new ResponseEntity<>(result, HttpStatus.OK);
         } catch (UserNotFoundException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User not found XXX!", e); //catturiamo le specifiche eccezioni -> la buona prassi infatti ci dice di creare e sollevare nei service le specifiche eccezioni
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User not found !", e); //catturiamo le specifiche eccezioni -> la buona prassi infatti ci dice di creare e sollevare nei service le specifiche eccezioni
         } catch (DateWrongRangeException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Start date must be previous end date XXX!", e);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Start date must be previous end date !", e);
+        }
+    }
+
+    @PreAuthorize("hasAuthority('admin')")
+    @GetMapping("/all")
+    public ResponseEntity getAllPurchases() { //l'utente non deve essere passato come parametro ma l'autenticazione deve avvenire tramite token
+        try {
+            return new ResponseEntity<>(purchasingService.getAllPurchases(), HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(new ResponseMessage("Internal error !"), HttpStatus.BAD_REQUEST);
         }
     }
 
