@@ -4,6 +4,7 @@ import lombok.Getter;
 import org.keycloak.OAuth2Constants;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
+import support.Costants;
 
 /**
  * La seguente classe rappresenta l'authentication server keycloak
@@ -14,24 +15,17 @@ public enum KeycloakAccess {
 
     KEYCLOAK_ACCESS;
 
-    //Se specifico le costanti nel file yaml non vengono considerate
-    private final String usernameAdmin = "ale";
-    private final String passwordAdmin = "computer";
-    private final String clientId = "server-store";
-    private final String serverUrl = "http://localhost:8180/";
-    private final String realm = "realm_prog";
-    private final String clientSecret = "nuMDmf301DJgDJrx8UvCIoW47BWl8rv8";
     private final Keycloak keycloak;
 
     KeycloakAccess() {
         keycloak = KeycloakBuilder.builder()
-                .serverUrl(serverUrl)
-                .realm(realm)
+                .serverUrl(Costants.SERVERURL)
+                .realm(Costants.REALM)
                 .grantType(OAuth2Constants.PASSWORD)
-                .clientId(clientId)
-                .clientSecret(clientSecret)
-                .username(usernameAdmin)
-                .password(passwordAdmin)
+                .clientId(Costants.CLIENTID)
+                .clientSecret(Costants.CLIENTSECRET)
+                .username(Costants.USERNAMEADMIN)
+                .password(Costants.PASSWORDADMIN)
                 .build();
     }
 

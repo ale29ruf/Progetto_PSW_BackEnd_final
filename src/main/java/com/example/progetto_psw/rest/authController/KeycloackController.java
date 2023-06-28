@@ -23,9 +23,9 @@ public class KeycloackController {
         try{
             return new ResponseEntity<>(keycloackService.addUser(user), HttpStatus.OK);
         } catch(UsernameUserAlreadyExistsException e){
-            return new ResponseEntity<>(new ResponseMessage("Username già in uso"),HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ResponseMessage("USERNAME_ALREADY_IN_USE"),HttpStatus.BAD_REQUEST);
         } catch (MailUserAlreadyExistsException e){
-            return new ResponseEntity<>(new ResponseMessage("E-mail già in uso"),HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ResponseMessage("EMAIL_ALREADY_IN_USE"),HttpStatus.BAD_REQUEST);
         }
     }
 }

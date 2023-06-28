@@ -27,9 +27,9 @@ public class ProductsController {
         try {
             productService.addProduct(product);
         } catch (BarCodeAlreadyExistException e) {
-            return new ResponseEntity<>(new ResponseMessage("Barcode already exist!"), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ResponseMessage("BARCODE_ALREADY_EXIST"), HttpStatus.BAD_REQUEST);
         }
-        return new ResponseEntity<>(new ResponseMessage("Added successful!"), HttpStatus.OK);
+        return new ResponseEntity<>(new ResponseMessage("ADDED_SUCCESFUL"), HttpStatus.OK);
     }
 
     @GetMapping
@@ -43,7 +43,7 @@ public class ProductsController {
                                  @RequestParam(value = "sortBy", defaultValue = "id") String sortBy) {
         List<Product> result = productService.showAllProducts(pageNumber, pageSize, sortBy); //gli oggetti che vengono restituiti sono convertiti da spring automaticamente in json
         if ( result.size() <= 0 ) {
-            return new ResponseEntity<>(new ResponseMessage("No results!"), HttpStatus.OK);
+            return new ResponseEntity<>(new ResponseMessage("NO_RESULT"), HttpStatus.OK);
         }
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
@@ -52,7 +52,7 @@ public class ProductsController {
     public ResponseEntity getByName(@RequestParam(required = false) String name) { //il parametro nell'url deve chiamarsi "name"
         List<Product> result = productService.showProductsByName(name);
         if ( result.size() <= 0 ) {
-            return new ResponseEntity<>(new ResponseMessage("No results!"), HttpStatus.OK);
+            return new ResponseEntity<>(new ResponseMessage("NO_RESULT"), HttpStatus.OK);
         }
         return new ResponseEntity<>(result, HttpStatus.OK);
     }

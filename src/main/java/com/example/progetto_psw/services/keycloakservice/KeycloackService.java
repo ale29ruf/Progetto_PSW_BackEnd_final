@@ -14,6 +14,7 @@ import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import support.Costants;
 import support.exceptions.MailUserAlreadyExistsException;
 import support.exceptions.UsernameUserAlreadyExistsException;
 import support.keyclock.KeycloakAccess;
@@ -53,7 +54,7 @@ public class KeycloackService {
         user.setAttributes(Collections.singletonMap("origin", Arrays.asList("demo")));
 
         // Get realm
-        RealmResource realmResource = keycloak.realm(KeycloakAccess.KEYCLOAK_ACCESS.getRealm());
+        RealmResource realmResource = keycloak.realm(Costants.REALM);
         UsersResource usersRessource = realmResource.users();
 
         Response response = usersRessource.create(user); //crea l'utente
@@ -71,7 +72,7 @@ public class KeycloackService {
 
         userResource.resetPassword(passwordCred);
 
-        ClientRepresentation app1Client = realmResource.clients().findByClientId(KeycloakAccess.KEYCLOAK_ACCESS.getClientId()).get(0);
+        ClientRepresentation app1Client = realmResource.clients().findByClientId(Costants.CLIENTID).get(0);
 
         RoleRepresentation userClientRole = realmResource.clients().get(app1Client.getId()).roles().get(role).toRepresentation();
 

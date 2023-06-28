@@ -38,11 +38,11 @@ public class PurchasingController {
         try {
             return new ResponseEntity<>(purchasingService.addPurchase(purchase), HttpStatus.OK);
         } catch (QuantityProductUnavailableException e) {
-            return new ResponseEntity<>(new ResponseMessage("Product quantity unavailable!"), HttpStatus.BAD_REQUEST); // realmente il messaggio dovrebbe essrere più esplicativo (es. specificare il prodotto di cui non vi è disponibilità)
+            return new ResponseEntity<>(new ResponseMessage("PRODUCT_QUANTITY_UNAVAILABLE"), HttpStatus.BAD_REQUEST); // realmente il messaggio dovrebbe essrere più esplicativo (es. specificare il prodotto di cui non vi è disponibilità)
         } catch (IllegalArgumentException e){
             return new ResponseEntity<>(new ResponseMessage(e.getMessage()),HttpStatus.BAD_REQUEST);
         } catch (UserNotFoundException e){
-            return new ResponseEntity<>(new ResponseMessage("Username utente non trovata"),HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ResponseMessage("USERNAME_NOT_FOUND"),HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -55,7 +55,7 @@ public class PurchasingController {
         try {
             return new ResponseEntity<>(purchasingService.getPurchasesByUser(user), HttpStatus.OK);
         } catch (UserNotFoundException e) {
-            return new ResponseEntity<>(new ResponseMessage("User not found!"), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ResponseMessage("USER_NOT_FOUND"), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -68,13 +68,13 @@ public class PurchasingController {
             u.setUsername(Utils.getUsername());
             List<Purchase> result = purchasingService.getPurchasesByUserInPeriod(u, start, end);
             if ( result.size() <= 0 ) {
-                return new ResponseEntity<>(new ResponseMessage("No results!"), HttpStatus.OK);
+                return new ResponseEntity<>(new ResponseMessage("NO_RESULT"), HttpStatus.OK);
             }
             return new ResponseEntity<>(result, HttpStatus.OK);
         } catch (UserNotFoundException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User not found !", e); //catturiamo le specifiche eccezioni -> la buona prassi infatti ci dice di creare e sollevare nei service le specifiche eccezioni
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "USER_NOT_FOUND", e); //catturiamo le specifiche eccezioni -> la buona prassi infatti ci dice di creare e sollevare nei service le specifiche eccezioni
         } catch (DateWrongRangeException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Start date must be previous end date !", e);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "START_DATE_MUST_BE_PREVIUS_END_DATE", e);
         }
     }
 
@@ -84,7 +84,7 @@ public class PurchasingController {
         try {
             return new ResponseEntity<>(purchasingService.getAllPurchases(), HttpStatus.OK);
         } catch (IllegalArgumentException e) {
-            return new ResponseEntity<>(new ResponseMessage("Internal error !"), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ResponseMessage("INTERNAL_ERROR"), HttpStatus.BAD_REQUEST);
         }
     }
 
