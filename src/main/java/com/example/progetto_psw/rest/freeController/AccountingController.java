@@ -21,7 +21,7 @@ public class AccountingController {
     @Autowired
     private AccountingService accountingService;
 
-    @PreAuthorize("hasAuthority('admin')")
+    @PreAuthorize("hasAuthority('admin')") //USARE IL SEGUENTE METODO SOLO COME TESTING
     @PostMapping
     public ResponseEntity createNewUser(@RequestBody @Valid User user) { //l'oggetto JSON nel payload della richiesta viene convertito in un'entità del dominio applicando le regole di validazione nell'entità
                                                                          //Ovviamente lato client i controllo sui campi devono essere sempre fatti a prescindere.

@@ -19,7 +19,7 @@ public enum KeycloakAccess {
 
     KeycloakAccess() {
         keycloak = KeycloakBuilder.builder()
-                .serverUrl(Costants.SERVERURL)
+                .serverUrl(Costants.AUTHSERVERURL)
                 .realm(Costants.REALM)
                 .grantType(OAuth2Constants.PASSWORD)
                 .clientId(Costants.CLIENTID)

@@ -19,13 +19,15 @@ public class KeycloackController {
     KeycloackService keycloackService;
 
     @PostMapping("/addUser")
-    public ResponseEntity addUser(@RequestBody @Valid User user) {
+    public ResponseEntity addUser(@RequestBody User user) { // TODO ABILITARE LA VALIDAZIONE CON @Valid
         try{
             return new ResponseEntity<>(keycloackService.addUser(user), HttpStatus.OK);
         } catch(UsernameUserAlreadyExistsException e){
             return new ResponseEntity<>(new ResponseMessage("USERNAME_ALREADY_IN_USE"),HttpStatus.BAD_REQUEST);
         } catch (MailUserAlreadyExistsException e){
             return new ResponseEntity<>(new ResponseMessage("EMAIL_ALREADY_IN_USE"),HttpStatus.BAD_REQUEST);
+        } catch (Exception e){
+            return new ResponseEntity<>(new ResponseMessage("SERVER_ERROR"), HttpStatus.BANDWIDTH_LIMIT_EXCEEDED);
         }
     }
 }

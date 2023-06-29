@@ -14,8 +14,13 @@ import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import support.Costants;
 import support.exceptions.MailUserAlreadyExistsException;
+import support.exceptions.QuantityProductUnavailableException;
+import support.exceptions.UserNotFoundException;
 import support.exceptions.UsernameUserAlreadyExistsException;
 import support.keyclock.KeycloakAccess;
 
@@ -33,16 +38,23 @@ public class KeycloackService {
     AccountingService accountingService;
 
     private final String role = "user";
-    private String email;
-    private String userName;
-    private String password;
 
-    public User addUser(User userE) throws MailUserAlreadyExistsException, UsernameUserAlreadyExistsException {
-        email = userE.getEmail();
-        userName = userE.getUsername();
-        password = userE.getPassword();
+    @Transactional(readOnly = false, isolation = Isolation.REPEATABLE_READ, propagation = Propagation.REQUIRED,
+            rollbackFor = {QuantityProductUnavailableException.class, UserNotFoundException.class, Exception.class})
+    public User addUser(User userE) throws UsernameUserAlreadyExistsException, MailUserAlreadyExistsException {
+        String email = userE.getEmail();
+        String userName = userE.getUsername();
+        String password = userE.getPassword();
 
-        User u = accountingService.verifyEmailUsernameUser(userE);
+        if ( userRepository.existsByEmail(email) ) {
+            throw new MailUserAlreadyExistsException();
+        }
+
+        if(userRepository.existsByUsername(password)){
+            throw new UsernameUserAlreadyExistsException();
+        }
+
+        User u = userRepository.save(userE);
 
         Keycloak keycloak = KeycloakAccess.KEYCLOAK_ACCESS.getKeycloak();
 
@@ -78,6 +90,7 @@ public class KeycloackService {
 
         userResource.roles().clientLevel(app1Client.getId()).add(Arrays.asList(userClientRole));
 
+        System.out.println("Utente aggiunto su keycloak");
         return u;
     }
 

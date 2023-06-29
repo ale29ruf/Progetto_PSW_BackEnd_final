@@ -30,7 +30,7 @@ server:
     key-store-password: computer
     key-store-type: PKCS12
     enabled: true
-    key-store: C:\Users\aless\Desktop\Progetto_PSW\src\main\resources\keytool\localhost-ssl.p12
+    key-store: C:\Users\aless\Desktop\Project_ECommerce_BackEnd\src\main\resources\keytool\localhost-ssl.p12
   port: 9190
 
   compression:
