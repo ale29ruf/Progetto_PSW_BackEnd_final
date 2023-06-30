@@ -1,4 +1,4 @@
-package com.example.progetto_psw.rest.freeController;
+package com.example.progetto_psw.rest.controller;
 
 
 import com.example.progetto_psw.entities.User;

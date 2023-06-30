@@ -1,10 +1,9 @@
-package com.example.progetto_psw.rest.freeController;
+package com.example.progetto_psw.rest.controller;
 
 
 import com.example.progetto_psw.entities.Purchase;
 import com.example.progetto_psw.entities.User;
 import com.example.progetto_psw.services.PurchasingService;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;

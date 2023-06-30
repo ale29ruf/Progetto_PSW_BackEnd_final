@@ -1,5 +1,6 @@
 package com.example.progetto_psw.rest.authController;
 
+import ch.qos.logback.core.net.SyslogOutputStream;
 import com.example.progetto_psw.entities.User;
 import com.example.progetto_psw.services.keycloakservice.KeycloackService;
 import jakarta.validation.Valid;
@@ -12,6 +13,7 @@ import support.exceptions.MailUserAlreadyExistsException;
 import support.exceptions.UsernameUserAlreadyExistsException;
 
 @RestController
+@CrossOrigin
 @RequestMapping("/manage")
 public class KeycloackController {
 
@@ -19,7 +21,7 @@ public class KeycloackController {
     KeycloackService keycloackService;
 
     @PostMapping("/addUser")
-    public ResponseEntity addUser(@RequestBody User user) { // TODO ABILITARE LA VALIDAZIONE CON @Valid
+    public ResponseEntity addUser(@RequestBody @Valid User user) {
         try{
             return new ResponseEntity<>(keycloackService.addUser(user), HttpStatus.OK);
         } catch(UsernameUserAlreadyExistsException e){

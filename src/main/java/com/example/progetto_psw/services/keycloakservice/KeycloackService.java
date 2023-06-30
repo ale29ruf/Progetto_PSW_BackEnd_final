@@ -50,7 +50,7 @@ public class KeycloackService {
             throw new MailUserAlreadyExistsException();
         }
 
-        if(userRepository.existsByUsername(password)){
+        if(userRepository.existsByUsername(userName)){
             throw new UsernameUserAlreadyExistsException();
         }
 

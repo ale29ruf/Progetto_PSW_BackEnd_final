@@ -15,6 +15,8 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
     List<Product> findByNameContaining(String name);
     List<Product> findByBarCode(String name);
     boolean existsByBarCode(String barCode);
+    List<Product> findByNameIgnoreCase(String name);
+    boolean existsProductByNameIgnoreCase(String name);
 
     @Query("SELECT p " +
             "FROM Product p " +

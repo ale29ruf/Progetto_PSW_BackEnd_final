@@ -1,4 +1,4 @@
-package com.example.progetto_psw.rest.freeController;
+package com.example.progetto_psw.rest.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

@@ -4,6 +4,9 @@ package com.example.progetto_psw.entities;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.annotation.Nonnull;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Size;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -32,6 +35,8 @@ public class Product {
 
     @Basic
     @Column(name = "bar_code", nullable = false, length = 20)
+    @Size(min = 5, max = 5)
+    @Nonnull
     private String barCode;
 
     @Basic
@@ -45,6 +50,10 @@ public class Product {
     @Basic
     @Column(name = "quantity", nullable = false)
     private int quantity;
+
+    @Basic
+    @Column(name = "category", nullable = true)
+    private Categories category;
 
     @Version
     @Column(name = "version", nullable = false)

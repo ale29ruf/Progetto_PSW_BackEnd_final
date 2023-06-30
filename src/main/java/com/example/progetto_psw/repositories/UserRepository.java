@@ -18,6 +18,6 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     List<User> findByCodFiscale(String code);
     List<User> findByUsername(String code);
     boolean existsByEmail(String email);
-    boolean existsByUsername(String email);
+    boolean existsByUsername(String username);
 
 }
