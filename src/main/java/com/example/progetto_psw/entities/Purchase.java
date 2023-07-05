@@ -1,6 +1,9 @@
 package com.example.progetto_psw.entities;
 
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIdentityReference;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.annotation.Nonnull;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -29,11 +32,14 @@ public class Purchase {
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "purchase_time")
+    @Nonnull
     private Date purchaseTime;
 
     @ManyToOne
     @JoinColumn(name = "buyer")
     @Nonnull
+    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+    @JsonIdentityReference(alwaysAsId = true)
     private User buyer;
 
     @OneToMany(mappedBy = "purchase", cascade = {CascadeType.PERSIST, CascadeType.REMOVE, CascadeType.REFRESH})

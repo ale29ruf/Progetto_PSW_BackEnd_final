@@ -14,15 +14,17 @@ import jakarta.persistence.EntityManager;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import support.PipDetails;
 import support.authentication.Utils;
 import support.exceptions.DateWrongRangeException;
+import support.exceptions.PriceChangedException;
 import support.exceptions.QuantityProductUnavailableException;
 import support.exceptions.UserNotFoundException;
 
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
@@ -42,34 +44,42 @@ public class PurchasingService {
 
 
     @Transactional(readOnly = false, propagation = Propagation.NESTED,
-            rollbackFor = {QuantityProductUnavailableException.class,UserNotFoundException.class})
-    public Purchase addPurchase( @Valid Purchase purchase) throws QuantityProductUnavailableException, UserNotFoundException {
+            rollbackFor = {QuantityProductUnavailableException.class,UserNotFoundException.class,PriceChangedException.class})
+    public Purchase addPurchase(@Valid List<PipDetails> pipDetailsList) throws QuantityProductUnavailableException, UserNotFoundException, PriceChangedException {
         if(!userRepository.existsByUsername(Utils.getUsername())) throw new UserNotFoundException();
-
-        User u = userRepository.findByUsername(Utils.getUsername()).get(0); //L'utente esiste sicuramente dato che per accedere all'end-point bisogna essere autenticati
+        User u = userRepository.findByUsername(Utils.getUsername()).get(0);
+        Purchase purchase = new Purchase();
         purchase.setBuyer(u);
-        for(ProductInPurchase pip : purchase.getProductsInPurchase()){
-            pip.setPurchase(purchase);
-            Optional<Product> p = productRepository.findById(pip.getProduct().getId());
-            if(p.isEmpty()) throw new IllegalArgumentException("Id "+pip.getProduct().getId()+" non esistente");
-            Product product = p.get();
-            int newQuantity = product.getQuantity() - pip.getQuantity();
-            if ( newQuantity < 0 )  throw new QuantityProductUnavailableException("Id: "+product.getId());
-            product.setQuantity(newQuantity);
-
-        }
-
+        purchase.setPurchaseTime(new Date(System.currentTimeMillis()));
+        purchase.setProductsInPurchase(new LinkedList<>());
         purchaseRepository.save(purchase);
+
+        for(PipDetails pipDetails : pipDetailsList){
+            Optional<Product> p = productRepository.findById(pipDetails.getPid());
+            if(p.isEmpty()) throw new IllegalArgumentException("Prodotto con id "+pipDetails.getPid()+" non esistente");
+            Product product = p.get();
+            if(product.getQuantity() < pipDetails.getQta()) throw new QuantityProductUnavailableException(product.getId());
+            if(product.getPrice() != pipDetails.getPrice()) throw new PriceChangedException(product.getId());
+            ProductInPurchase pip = new ProductInPurchase();
+            pip.setQuantity(pipDetails.getQta());
+            pip.setPrice(pipDetails.getPrice());
+            pip.setPurchase(purchase);
+            pip.setProduct(product);
+            pip.setCart(u.getCart());
+            productInPurchaseRepository.save(pip);
+            purchase.getProductsInPurchase().add(pip);
+            product.setQuantity(product.getQuantity() - pip.getQuantity());
+        }
 
         return purchase;
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public List<Purchase> getPurchasesByUser(User user) throws UserNotFoundException {
-        if ( !userRepository.existsByUsername(user.getUsername()) ) {
+    public List<Purchase> getPurchasesByUser() throws UserNotFoundException {
+        if ( !userRepository.existsByUsername(Utils.getUsername()) ) {
             throw new UserNotFoundException();
         }
-        User u = userRepository.findByUsername(user.getUsername()).get(0);
+        User u = userRepository.findByUsername(Utils.getUsername()).get(0);
         return purchaseRepository.findByBuyer(u);
     }
 

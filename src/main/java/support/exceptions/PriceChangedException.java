@@ -1,16 +1,14 @@
 package support.exceptions;
 
-
-public class QuantityProductUnavailableException extends Exception {
-
+public class PriceChangedException extends Exception{
     private int pid;
+
     public int getPid() {
         return pid;
     }
 
-    public QuantityProductUnavailableException(int pid) {
+    public PriceChangedException(int pid) {
         super();
         this.pid = pid;
     }
-
 }
