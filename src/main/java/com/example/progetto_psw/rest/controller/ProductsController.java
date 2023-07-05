@@ -3,6 +3,7 @@ package com.example.progetto_psw.rest.controller;
 
 import com.example.progetto_psw.entities.Product;
 import com.example.progetto_psw.services.ProductService;
+import jakarta.persistence.OptimisticLockException;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,6 +23,7 @@ import java.util.List;
 public class ProductsController {
     @Autowired
     private ProductService productService;
+    final int MAX_TENTATIVE = 5;
 
     @PreAuthorize("hasAuthority('admin')")
     @PostMapping("/add")
@@ -34,21 +36,32 @@ public class ProductsController {
         } catch (NameProductAlreadyExistException e) {
             return new ResponseEntity<>(new ResponseMessage("NAME_ALREADY_EXIST"), HttpStatus.BAD_REQUEST);
         } catch (ValidationFailed e) {
-            return new ResponseEntity<>(new ResponseMessage("VALIDATION_FAILED"), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ResponseMessage("VALIDATION_FAILED_CHECK_DATA"), HttpStatus.OK);
         }
         return new ResponseEntity<>(p, HttpStatus.OK);
     }
 
+    /**
+     * Mentre si aggiorna la quantità di un prodotto, potrebbe essere decrementata da parte di un acquisto in esecuzione
+     */
     @PreAuthorize("hasAuthority('admin')")
     @GetMapping("/updateQnt")
     public ResponseEntity updateQntProduct(@RequestParam(value = "idProd", required = true) int idProd,
                                            @RequestParam(value = "newQnt", required = true) int qnt) {
+        int i = 0;
         try {
-            productService.updateQtProduct(idProd,qnt);
+            while(i < MAX_TENTATIVE){
+                try{
+                    productService.updateQtProduct(idProd,qnt);
+                    return new ResponseEntity<>(new ResponseMessage("UPDATE_SUCCESFULLY"), HttpStatus.OK);
+                } catch(OptimisticLockException e){
+                    i++;
+                }
+            }
         } catch (ValidationFailed e) {
-            return new ResponseEntity<>(new ResponseMessage("VALIDATION_FAILED"), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ResponseMessage("VALIDATION_FAILED_CHECK_DATA"), HttpStatus.BAD_REQUEST);
         }
-        return new ResponseEntity<>(new ResponseMessage("UPDATE_SUCCESFULLY"), HttpStatus.OK);
+        return new ResponseEntity<>(new ResponseMessage("INNER_ERROR_TRY_LATER"), HttpStatus.OK);
     }
 
     @PreAuthorize("hasAuthority('admin')")

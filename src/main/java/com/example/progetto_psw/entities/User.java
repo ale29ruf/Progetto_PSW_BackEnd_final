@@ -73,6 +73,7 @@ public class User {
     private List<Purchase> purchases;
 
     @Transient
+    @JsonIgnore
     private String password;
 
     public User(int id){

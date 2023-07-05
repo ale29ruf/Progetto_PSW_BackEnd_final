@@ -29,13 +29,19 @@ public class ProductInPurchase {
     private Purchase purchase;
 
     @Basic
-    @Column(name = "quantity", nullable = true)
+    @Column(name = "quantity", nullable = false)
     @Nonnull
     private int quantity; //introduciamo questa entity proprio per poter specificare la quantità per ogni prodotto all'interno dello specifico ordine
 
-    // TODO aggiungere eventualmente il prezzo (che potrebbe differire da quello del prodotto in Product con il passare del tempo)
+    @Basic
+    @Column(name = "price", nullable = false)
+    @Nonnull
+    private int price; //introduciamo questa entity proprio per poter specificare la quantità per ogni prodotto all'interno dello specifico ordine
 
-    @ManyToOne(cascade = CascadeType.MERGE)
+    /**
+     * Sarebbe sbagliato propagare Persist o Remove sui prodotti
+     */
+    @ManyToOne(cascade = {CascadeType.REFRESH})
     @JoinColumn(name = "product")
     @Nonnull
     private Product product;

@@ -40,6 +40,7 @@ CREATE TABLE product_in_purchase
 (
     id               INTEGER DEFAULT NEXTVAL('product_in_purchase_seq') PRIMARY KEY,
     related_purchase INTEGER,
+    price            INTEGER,
     product          INTEGER,
     quantity         INTEGER,
     FOREIGN KEY (related_purchase) REFERENCES purchase (id),

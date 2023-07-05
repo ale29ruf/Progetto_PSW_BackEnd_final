@@ -4,9 +4,7 @@ package com.example.progetto_psw.entities;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.annotation.Nonnull;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -49,6 +47,7 @@ public class Product {
 
     @Basic
     @Column(name = "quantity", nullable = false)
+    @PositiveOrZero
     private int quantity;
 
     @Basic
@@ -60,7 +59,12 @@ public class Product {
     @JsonIgnore
     private long version; //supportare la gestione ottimistica della concorrenza
 
-    @OneToMany(targetEntity = ProductInPurchase.class, mappedBy = "product", cascade = CascadeType.MERGE)
+    /**
+     * Diamo la possibilità di aggiungere un eventuale service che possa restituire, dato un prodotto, tutti i ProductInPurchase in cui compare.
+     * Le propagazione verso i ProductInPurchase non hanno senso in questo caso dato che la vita dei prodotti nel db è indipendente da quella dei
+     * prodotti in un acquisto.
+     */
+    @OneToMany(targetEntity = ProductInPurchase.class, mappedBy = "product")
     @JsonIgnore
     @ToString.Exclude
     private List<ProductInPurchase> productsInPurchase;

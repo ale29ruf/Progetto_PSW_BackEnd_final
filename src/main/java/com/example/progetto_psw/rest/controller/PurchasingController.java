@@ -4,6 +4,7 @@ package com.example.progetto_psw.rest.controller;
 import com.example.progetto_psw.entities.Purchase;
 import com.example.progetto_psw.entities.User;
 import com.example.progetto_psw.services.PurchasingService;
+import jakarta.persistence.OptimisticLockException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -16,7 +17,9 @@ import support.authentication.Utils;
 import support.exceptions.DateWrongRangeException;
 import support.exceptions.QuantityProductUnavailableException;
 import support.exceptions.UserNotFoundException;
+import support.exceptions.ValidationFailed;
 
+import javax.validation.ConstraintViolationException;
 import java.util.Date;
 import java.util.List;
 
@@ -26,29 +29,45 @@ import java.util.List;
 public class PurchasingController {
     @Autowired
     private PurchasingService purchasingService;
+    final int MAX_TENTATIVE = 5;
 
     @PreAuthorize("hasAuthority('user')")
     @PostMapping
     @ResponseStatus(code = HttpStatus.OK)
     public ResponseEntity createPurchase(@RequestBody Purchase purchase) { // è buona prassi ritornare l'oggetto inserito
+
+        //Estraggo le informazioni dal token e le inserisco nel purchase
         User u = new User();
         u.setUsername(Utils.getUsername());
         purchase.setBuyer(u);
+        int i = 0;
         try {
-            return new ResponseEntity<>(purchasingService.addPurchase(purchase), HttpStatus.OK);
+            while(i < MAX_TENTATIVE){
+                try{
+                    purchasingService.addPurchase(purchase);
+                    return new ResponseEntity<>(purchase, HttpStatus.OK);
+                } catch(OptimisticLockException e){
+                    i++;
+                }
+            }
         } catch (QuantityProductUnavailableException e) {
-            return new ResponseEntity<>(new ResponseMessage("PRODUCT_QUANTITY_UNAVAILABLE"), HttpStatus.BAD_REQUEST); // realmente il messaggio dovrebbe essrere più esplicativo (es. specificare il prodotto di cui non vi è disponibilità)
+            return new ResponseEntity<>(new ResponseMessage("PRODUCT_QUANTITY_UNAVAILABLE"), HttpStatus.BAD_REQUEST); // Realmente il messaggio dovrebbe essrere più esplicativo (es. specificare il prodotto di cui non vi è disponibilità)
         } catch (IllegalArgumentException e){
             return new ResponseEntity<>(new ResponseMessage(e.getMessage()),HttpStatus.BAD_REQUEST);
         } catch (UserNotFoundException e){
             return new ResponseEntity<>(new ResponseMessage("USERNAME_NOT_FOUND"),HttpStatus.BAD_REQUEST);
+        } catch (ValidationFailed e){
+            return new ResponseEntity<>(new ResponseMessage("VALIDATION_FAILED_CHECK_DATA"),HttpStatus.OK);
+        } catch (ConstraintViolationException e){ // l'eccezione viene sollevata nel caso in cui si prova a inserire un prodotto che non rispetta i vincoli sugli attributi
+            return new ResponseEntity<>(new ResponseMessage("INTERNAL_ERROR_TRY_LATER"),HttpStatus.OK); //Per precauzione
         }
+        return new ResponseEntity<>(new ResponseMessage("INNER_ERROR_TRY_LATER"), HttpStatus.OK);
     }
 
 
     @PreAuthorize("hasAuthority('user')")
     @GetMapping("/purchases")
-    public ResponseEntity getPurchases() { //l'utente non deve essere passato come parametro ma l'autenticazione deve avvenire tramite token
+    public ResponseEntity getPurchases() {
         User user = new User();
         user.setUsername(Utils.getUsername());
         try {

@@ -36,7 +36,7 @@ public class Purchase {
     @Nonnull
     private User buyer;
 
-    @OneToMany(mappedBy = "purchase", cascade = CascadeType.MERGE) //la propagazione avviene solo per l'operazione di merge() sulla entity padre
+    @OneToMany(mappedBy = "purchase", cascade = {CascadeType.PERSIST, CascadeType.REMOVE, CascadeType.REFRESH})
     private List<ProductInPurchase> productsInPurchase;
 
 

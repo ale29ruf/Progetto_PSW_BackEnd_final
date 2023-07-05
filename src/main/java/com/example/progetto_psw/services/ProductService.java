@@ -1,6 +1,5 @@
 package com.example.progetto_psw.services;
 
-import com.example.progetto_psw.entities.Categories;
 import com.example.progetto_psw.entities.Product;
 import com.example.progetto_psw.repositories.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +8,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import support.exceptions.BarCodeAlreadyExistException;
 import support.exceptions.NameProductAlreadyExistException;
@@ -25,7 +25,11 @@ public class ProductService {
     private ProductRepository productRepository;
 
 
-    @Transactional(readOnly = false, rollbackFor = {BarCodeAlreadyExistException.class, NameProductAlreadyExistException.class})
+    /**
+     * Usando Isolation.REPEATABLE_READ evito che possano essere inseriti due prodotti contemporaneamente che hanno lo stesso barCode o name (lock sull'intera query)
+     */
+    @Transactional(readOnly = false, rollbackFor = {BarCodeAlreadyExistException.class, NameProductAlreadyExistException.class},
+            isolation = Isolation.REPEATABLE_READ)
     public Product addProduct(Product product) throws BarCodeAlreadyExistException, NameProductAlreadyExistException {
         if(product.getBarCode() == null || product.getName() == null )
             throw new ValidationFailed();
