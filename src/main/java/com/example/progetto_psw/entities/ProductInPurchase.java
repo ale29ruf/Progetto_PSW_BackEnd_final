@@ -1,7 +1,10 @@
 package com.example.progetto_psw.entities;
 
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.annotation.Nonnull;
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
@@ -41,9 +44,11 @@ public class ProductInPurchase {
     /**
      * Sarebbe sbagliato propagare Persist o Remove sui prodotti
      */
-    @ManyToOne(cascade = {CascadeType.REFRESH})
+    @ManyToOne()
     @JoinColumn(name = "product")
     @Nonnull
+    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+    @JsonIdentityReference(alwaysAsId = true)
     private Product product;
 
     @ManyToOne()

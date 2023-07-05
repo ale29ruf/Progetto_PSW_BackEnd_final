@@ -29,7 +29,7 @@ public class KeycloackController {
         } catch (MailUserAlreadyExistsException e){
             return new ResponseEntity<>(new ResponseMessage("EMAIL_ALREADY_IN_USE"),HttpStatus.BAD_REQUEST);
         } catch (Exception e){
-            return new ResponseEntity<>(new ResponseMessage("SERVER_ERROR"), HttpStatus.BANDWIDTH_LIMIT_EXCEEDED);
+            return new ResponseEntity<>(new ResponseMessage(e.getMessage()), HttpStatus.BANDWIDTH_LIMIT_EXCEEDED);
         }
     }
 }

@@ -6,10 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import support.ResponseMessage;
 import support.exceptions.UserNotFoundException;
 
@@ -20,8 +17,11 @@ public class CartController {
     @Autowired
     CartService cartService;
 
+    /**
+     * Attenzione: il carrello per un relativo utente viene creato nel momento in cui aggiunge il primo prodotto
+     */
     @PreAuthorize("hasAuthority('user')")
-    @PostMapping("/get")
+    @GetMapping("/get")
     public ResponseEntity getCart(){
         Cart cart;
         try{
@@ -33,12 +33,12 @@ public class CartController {
     }
 
     @PreAuthorize("hasAuthority('user')")
-    @PostMapping("/addProd")
+    @GetMapping("/addProd")
     public ResponseEntity addProductInCart(@RequestParam(value = "idProd", required = true) int idProd){
         try{
             cartService.addProduct(idProd);
         } catch (IllegalArgumentException e){
-            return new ResponseEntity<>(new ResponseMessage(e.getMessage()),HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ResponseMessage("PRODUCT_DOESNT_EXIST"),HttpStatus.BAD_REQUEST);
         } catch (UserNotFoundException e){
             return new ResponseEntity<>(new ResponseMessage("USERNAME_NOT_FOUND"),HttpStatus.BAD_REQUEST);
         }
@@ -46,12 +46,12 @@ public class CartController {
     }
 
     @PreAuthorize("hasAuthority('user')")
-    @PostMapping("/removeProd")
+    @GetMapping("/removeProd")
     public ResponseEntity removeProductInCart(@RequestParam(value = "idProd", required = true) int idProd){
         try{
             cartService.removeProduct(idProd);
         } catch (IllegalArgumentException e){
-            return new ResponseEntity<>(new ResponseMessage(e.getMessage()),HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ResponseMessage("PRODUCT_DOESNT_EXIST"),HttpStatus.BAD_REQUEST);
         } catch (UserNotFoundException e){
             return new ResponseEntity<>(new ResponseMessage("USERNAME_NOT_FOUND"),HttpStatus.BAD_REQUEST);
         }
@@ -59,12 +59,12 @@ public class CartController {
     }
 
     @PreAuthorize("hasAuthority('user')")
-    @PostMapping("/plusQntProd")
+    @GetMapping("/plusQntProd")
     public ResponseEntity plusQntProductInCart(@RequestParam(value = "idProd", required = true) int idProd){
         try{
             cartService.plusQntProduct(idProd);
         } catch (IllegalArgumentException e){
-            return new ResponseEntity<>(new ResponseMessage(e.getMessage()),HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ResponseMessage("PRODUCT_IN_PURCHASE_NOT_EXIST_IN_CART"),HttpStatus.BAD_REQUEST);
         } catch (UserNotFoundException e){
             return new ResponseEntity<>(new ResponseMessage("USERNAME_NOT_FOUND"),HttpStatus.BAD_REQUEST);
         }
@@ -72,12 +72,12 @@ public class CartController {
     }
 
     @PreAuthorize("hasAuthority('user')")
-    @PostMapping("/minusQntProd")
+    @GetMapping("/minusQntProd")
     public ResponseEntity minusQntProductInCart(@RequestParam(value = "idProd", required = true) int idProd){
         try{
             cartService.minusQntProduct(idProd);
         } catch (IllegalArgumentException e){
-            return new ResponseEntity<>(new ResponseMessage(e.getMessage()),HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ResponseMessage("PRODUCT_IN_PURCHASE_NOT_EXIST_IN_CART"),HttpStatus.BAD_REQUEST);
         } catch (UserNotFoundException e){
             return new ResponseEntity<>(new ResponseMessage("USERNAME_NOT_FOUND"),HttpStatus.BAD_REQUEST);
         }

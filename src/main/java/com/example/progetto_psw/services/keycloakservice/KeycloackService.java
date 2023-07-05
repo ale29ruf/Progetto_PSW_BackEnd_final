@@ -45,6 +45,7 @@ public class KeycloackService {
         String email = userE.getEmail();
         String userName = userE.getUsername();
         String password = userE.getPassword();
+        System.out.println("Nuovo utente: email->"+email+", username->"+userName+", password->"+password);
 
         if ( userRepository.existsByEmail(email) ) {
             throw new MailUserAlreadyExistsException();

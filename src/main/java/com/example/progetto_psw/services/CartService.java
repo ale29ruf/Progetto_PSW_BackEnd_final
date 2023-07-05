@@ -8,15 +8,14 @@ import com.example.progetto_psw.repositories.CartRepository;
 import com.example.progetto_psw.repositories.ProductInPurchaseRepository;
 import com.example.progetto_psw.repositories.ProductRepository;
 import com.example.progetto_psw.repositories.UserRepository;
-import jakarta.persistence.EntityManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import support.authentication.Utils;
-import support.exceptions.QuantityProductUnavailableException;
 import support.exceptions.UserNotFoundException;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
@@ -47,7 +46,7 @@ public class CartService {
         List<User> result = userRepository.findByUsername(Utils.getUsername());
         if(result.isEmpty()) throw new UserNotFoundException();
         Optional<Product> p = productRepository.findById(idProd);
-        if(p.isEmpty()) throw new IllegalArgumentException("Id "+idProd+" non esistente");
+        if(p.isEmpty()) throw new IllegalArgumentException();
         Product product = p.get();
         ProductInPurchase pip = new ProductInPurchase();
         pip.setProduct(product);
@@ -56,6 +55,13 @@ public class CartService {
         pip.setPrice(product.getPrice());
         User u = result.get(0);
         Cart cart = cartRepository.findByUser(u);
+        if(cart == null) { // L'utente non ha un carrello
+            cart = new Cart();
+            cart.setProductsInPurchase(new LinkedList<>());
+            cart.setUser(u);
+            u.setCart(cart);
+            cartRepository.save(cart);
+        }
         pip.setCart(cart);
         cart.getProductsInPurchase().add(pip);
         productInPurchaseRepository.save(pip);
@@ -67,10 +73,8 @@ public class CartService {
         if(result.isEmpty()) throw new UserNotFoundException();
         Optional<ProductInPurchase> pip = productInPurchaseRepository.findById(idProdInP);
         if(pip.isEmpty()) throw new IllegalArgumentException("PRODUCT_IN_PURCHASE_NOT_EXIST_IN_CART");
-        User u = result.get(0);
-        Cart cart = cartRepository.findByUser(u);
-        cart.getProductsInPurchase().remove(pip.get());
-        // cartRepository.save(cart); inutile dato che è gia' in stato managed
+        Cart cart = pip.get().getCart();
+        cart.getProductsInPurchase().remove(pip.get()); // cartRepository.save(cart); inutile dato che è gia' in stato managed
         productInPurchaseRepository.delete(pip.get());
     }
 
@@ -79,7 +83,7 @@ public class CartService {
         List<User> result = userRepository.findByUsername(Utils.getUsername());
         if(result.isEmpty()) throw new UserNotFoundException();
         Optional<ProductInPurchase> pip = productInPurchaseRepository.findById(idProdInP);
-        if(pip.isEmpty()) throw new IllegalArgumentException("PRODUCT_IN_PURCHASE_NOT_EXIST_IN_CART");
+        if(pip.isEmpty()) throw new IllegalArgumentException();
         int oldQnt = pip.get().getQuantity();
         pip.get().setQuantity(oldQnt+1);
     }
@@ -91,7 +95,13 @@ public class CartService {
         Optional<ProductInPurchase> pip = productInPurchaseRepository.findById(idProdInP);
         if(pip.isEmpty()) throw new IllegalArgumentException("PRODUCT_IN_PURCHASE_NOT_EXIST_IN_CART");
         int oldQnt = pip.get().getQuantity();
+        if(oldQnt-1 == 0) {
+            Cart cart = pip.get().getCart();
+            cart.getProductsInPurchase().remove(pip.get()); // cartRepository.save(cart); inutile dato che è gia' in stato managed
+            productInPurchaseRepository.delete(pip.get());
+        }
         pip.get().setQuantity(oldQnt-1);
+
     }
 
 }
