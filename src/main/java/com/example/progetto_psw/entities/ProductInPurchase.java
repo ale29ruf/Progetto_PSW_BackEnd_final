@@ -36,7 +36,7 @@ public class ProductInPurchase {
     @Basic
     @Column(name = "price", nullable = false)
     @Nonnull
-    private int price; //introduciamo questa entity proprio per poter specificare la quantità per ogni prodotto all'interno dello specifico ordine
+    private float price; //introduciamo questa entity proprio per poter specificare la quantità per ogni prodotto all'interno dello specifico ordine
 
     /**
      * Sarebbe sbagliato propagare Persist o Remove sui prodotti
@@ -45,6 +45,11 @@ public class ProductInPurchase {
     @JoinColumn(name = "product")
     @Nonnull
     private Product product;
+
+    @ManyToOne()
+    @JoinColumn(name = "related_cart")
+    @JsonIgnore
+    private Cart cart;
 
     public ProductInPurchase(Product product, int quantity){
         this.product = product;

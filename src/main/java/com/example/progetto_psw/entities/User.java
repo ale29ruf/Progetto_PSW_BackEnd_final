@@ -68,6 +68,11 @@ public class User {
     @Column(name = "address", nullable = false, length = 150)
     private String address;
 
+    @OneToOne(cascade = {CascadeType.REMOVE, CascadeType.REFRESH, CascadeType.PERSIST})
+    @JoinColumn(name = "related_cart")
+    @JsonIgnore
+    private Cart cart;
+
     @OneToMany(mappedBy = "buyer", cascade = CascadeType.MERGE)
     @JsonIgnore //se non ci fosse si avrebbe un ciclo se venisse chiesto un User
     private List<Purchase> purchases;

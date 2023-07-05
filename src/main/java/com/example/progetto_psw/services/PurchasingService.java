@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import support.authentication.Utils;
 import support.exceptions.DateWrongRangeException;
 import support.exceptions.QuantityProductUnavailableException;
 import support.exceptions.UserNotFoundException;
@@ -43,9 +44,9 @@ public class PurchasingService {
     @Transactional(readOnly = false, propagation = Propagation.NESTED,
             rollbackFor = {QuantityProductUnavailableException.class,UserNotFoundException.class})
     public Purchase addPurchase( @Valid Purchase purchase) throws QuantityProductUnavailableException, UserNotFoundException {
-        if(!userRepository.existsByUsername(purchase.getBuyer().getUsername())) throw new UserNotFoundException();
+        if(!userRepository.existsByUsername(Utils.getUsername())) throw new UserNotFoundException();
 
-        User u = userRepository.findByUsername(purchase.getBuyer().getUsername()).get(0); //L'utente esiste sicuramente dato che per accedere all'end-point bisogna essere autenticati
+        User u = userRepository.findByUsername(Utils.getUsername()).get(0); //L'utente esiste sicuramente dato che per accedere all'end-point bisogna essere autenticati
         purchase.setBuyer(u);
         for(ProductInPurchase pip : purchase.getProductsInPurchase()){
             pip.setPurchase(purchase);

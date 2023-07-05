@@ -30,6 +30,7 @@ public class SecurityConfiguration{
                        .requestMatchers("/purchase/**").permitAll()
                        .requestMatchers("/products/**").permitAll()
                        .requestMatchers("/manage/**").permitAll()
+                       .requestMatchers("/cart/**").permitAll()
                        .anyRequest().authenticated()
                 )
                .oauth2ResourceServer().jwt().jwtAuthenticationConverter(new JwtAuthenticationConverter());

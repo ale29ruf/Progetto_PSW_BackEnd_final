@@ -36,10 +36,6 @@ public class PurchasingController {
     @ResponseStatus(code = HttpStatus.OK)
     public ResponseEntity createPurchase(@RequestBody Purchase purchase) { // è buona prassi ritornare l'oggetto inserito
 
-        //Estraggo le informazioni dal token e le inserisco nel purchase
-        User u = new User();
-        u.setUsername(Utils.getUsername());
-        purchase.setBuyer(u);
         int i = 0;
         try {
             while(i < MAX_TENTATIVE){
