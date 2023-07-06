@@ -95,8 +95,4 @@ public class KeycloackService {
         return u;
     }
 
-
-    // TODO Implementare la rimozione di un utente sia lato server che su keycloak
-
-
 }

@@ -1,14 +1,18 @@
 package com.example.progetto_psw.rest.controller;
 
 import com.example.progetto_psw.entities.Cart;
+import com.example.progetto_psw.entities.Product;
 import com.example.progetto_psw.services.CartService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import support.PipDetails;
 import support.ResponseMessage;
 import support.exceptions.UserNotFoundException;
+
+import java.util.List;
 
 @RestController //unione di @Controller e @ResponseBody
 @RequestMapping("/cart")
@@ -39,7 +43,20 @@ public class CartController {
         try{
             cartService.addProduct(idProd);
         } catch (IllegalArgumentException e){
-            return new ResponseEntity<>(new ResponseMessage("PRODUCT_DOESNT_EXIST"),HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ResponseMessage("PRODUCT_NOT_EXIST"),HttpStatus.BAD_REQUEST);
+        } catch (UserNotFoundException e){
+            return new ResponseEntity<>(new ResponseMessage("USERNAME_NOT_FOUND"),HttpStatus.BAD_REQUEST);
+        }
+        return new ResponseEntity<>(new ResponseMessage("OK"), HttpStatus.OK);
+    }
+
+    @PreAuthorize("hasAuthority('user')")
+    @PostMapping("/addAllProd")
+    public ResponseEntity addProductInCart(@RequestBody List<PipDetails> listaProd){
+        try{
+            cartService.addAllProduct(listaProd);
+        } catch (IllegalArgumentException e){
+            return new ResponseEntity<>(new ResponseMessage("PRODUCT_NOT_EXIST"),HttpStatus.BAD_REQUEST);
         } catch (UserNotFoundException e){
             return new ResponseEntity<>(new ResponseMessage("USERNAME_NOT_FOUND"),HttpStatus.BAD_REQUEST);
         }
@@ -53,6 +70,17 @@ public class CartController {
             cartService.removeProduct(idProd);
         } catch (IllegalArgumentException e){
             return new ResponseEntity<>(new ResponseMessage("PRODUCT_DOESNT_EXIST"),HttpStatus.BAD_REQUEST);
+        } catch (UserNotFoundException e){
+            return new ResponseEntity<>(new ResponseMessage("USERNAME_NOT_FOUND"),HttpStatus.BAD_REQUEST);
+        }
+        return new ResponseEntity<>(new ResponseMessage("OK"), HttpStatus.OK);
+    }
+
+    @PreAuthorize("hasAuthority('user')")
+    @GetMapping("/removeAllProd")
+    public ResponseEntity removeProductInCart(){
+        try{
+            cartService.removeAllProduct();
         } catch (UserNotFoundException e){
             return new ResponseEntity<>(new ResponseMessage("USERNAME_NOT_FOUND"),HttpStatus.BAD_REQUEST);
         }

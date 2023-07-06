@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import support.PipDetails;
 import support.authentication.Utils;
 import support.exceptions.UserNotFoundException;
 
@@ -31,6 +32,11 @@ public class CartService {
     @Autowired
     private CartRepository cartRepository;
 
+    /**
+     * Se un prodotto cambia prezzo o quantità allora lo modifico all'interno del carrello.
+     * Tuttavia se il prodotto raggiunge quantità nulla allora lo lascio in modo che l'utente possa accorgersi che
+     * quel prodotto non è piu' disponibile. Ovviamente se procede con l'acquisto riceverà un'eccezione.
+     */
     @Transactional(readOnly = false, propagation = Propagation.NESTED,
             rollbackFor = {UserNotFoundException.class})
     public Cart getCart() throws UserNotFoundException{
@@ -69,12 +75,60 @@ public class CartService {
             cart.setProductsInPurchase(new LinkedList<>());
             cart.setUser(u);
             u.setCart(cart);
-            cartRepository.save(cart);
+
+            pip.setCart(cart);
+            cart.getProductsInPurchase().add(pip);
+            productInPurchaseRepository.save(pip);
+        } else {
+            for(ProductInPurchase productInPurchase : cart.getProductsInPurchase()){
+                if(productInPurchase.getProduct().getId() == product.getId())
+                    return;
+            }
+            pip.setCart(cart);
+            cart.getProductsInPurchase().add(pip);
+            productInPurchaseRepository.save(pip);
+
         }
-        pip.setCart(cart);
-        cart.getProductsInPurchase().add(pip);
-        productInPurchaseRepository.save(pip);
+
    }
+
+    @Transactional(readOnly = false, propagation = Propagation.NESTED,
+            rollbackFor = {UserNotFoundException.class})
+    public void addAllProduct(List<PipDetails> listaProd) throws UserNotFoundException {
+        List<User> result = userRepository.findByUsername(Utils.getUsername());
+        if(result.isEmpty()) throw new UserNotFoundException();
+        User u = result.get(0);
+        Cart cart = cartRepository.findByUser(u);
+        if(cart == null) { // L'utente non ha un carrello
+            cart = new Cart();
+            cart.setProductsInPurchase(new LinkedList<>());
+            cart.setUser(u);
+            u.setCart(cart);
+        }
+
+        for(PipDetails pipDetails : listaProd){
+            Optional<Product> p = productRepository.findById(pipDetails.getPid());
+            if(p.isEmpty()) throw new IllegalArgumentException();
+            Product product = p.get();
+
+            boolean exist = false;
+            for(ProductInPurchase productInPurchase : cart.getProductsInPurchase()){
+                if(productInPurchase.getProduct().getId() == product.getId())
+                    exist = true;
+                if(exist) break;
+            }
+            if(!exist) {
+                ProductInPurchase pip = new ProductInPurchase();
+                pip.setProduct(product);
+                pip.setQuantity(pipDetails.getQta());
+                pip.setPrice(product.getPrice());
+                pip.setCart(cart);
+                cart.getProductsInPurchase().add(pip);
+                productInPurchaseRepository.save(pip);
+            }
+        }
+
+    }
 
     @Transactional(readOnly = false, propagation = Propagation.NESTED, rollbackFor = {UserNotFoundException.class})
     public void removeProduct(int idProdInP) throws UserNotFoundException {
@@ -85,6 +139,15 @@ public class CartService {
         Cart cart = pip.get().getCart();
         cart.getProductsInPurchase().remove(pip.get()); // cartRepository.save(cart); inutile dato che è gia' in stato managed
         productInPurchaseRepository.delete(pip.get());
+    }
+
+    @Transactional(readOnly = false, propagation = Propagation.NESTED, rollbackFor = {UserNotFoundException.class})
+    public void removeAllProduct() throws UserNotFoundException {
+        List<User> result = userRepository.findByUsername(Utils.getUsername());
+        if(result.isEmpty()) throw new UserNotFoundException();
+        Cart cart = cartRepository.findByUser(result.get(0));
+        productInPurchaseRepository.deleteAll(cart.getProductsInPurchase());
+        cart.getProductsInPurchase().clear();
     }
 
     @Transactional(readOnly = false, propagation = Propagation.NESTED, rollbackFor = {UserNotFoundException.class})
