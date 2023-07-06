@@ -2,10 +2,7 @@ package com.example.progetto_psw.services;
 
 
 
-import com.example.progetto_psw.entities.Product;
-import com.example.progetto_psw.entities.ProductInPurchase;
-import com.example.progetto_psw.entities.Purchase;
-import com.example.progetto_psw.entities.User;
+import com.example.progetto_psw.entities.*;
 import com.example.progetto_psw.repositories.ProductInPurchaseRepository;
 import com.example.progetto_psw.repositories.ProductRepository;
 import com.example.progetto_psw.repositories.PurchaseRepository;
@@ -18,10 +15,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import support.PipDetails;
 import support.authentication.Utils;
-import support.exceptions.DateWrongRangeException;
-import support.exceptions.PriceChangedException;
-import support.exceptions.QuantityProductUnavailableException;
-import support.exceptions.UserNotFoundException;
+import support.exceptions.*;
 
 import java.util.Date;
 import java.util.LinkedList;
@@ -38,16 +32,17 @@ public class PurchasingService {
     @Autowired
     private UserRepository userRepository;
     @Autowired
-    private EntityManager entityManager;
-    @Autowired
     private ProductRepository productRepository;
 
 
     @Transactional(readOnly = false, propagation = Propagation.NESTED,
-            rollbackFor = {QuantityProductUnavailableException.class,UserNotFoundException.class,PriceChangedException.class})
-    public Purchase addPurchase(@Valid List<PipDetails> pipDetailsList) throws QuantityProductUnavailableException, UserNotFoundException, PriceChangedException {
+            rollbackFor = {QuantityProductUnavailableException.class,UserNotFoundException.class,PriceChangedException.class,InconsistencyCartException.class})
+    public Purchase addPurchase(@Valid List<PipDetails> pipDetailsList) throws QuantityProductUnavailableException, UserNotFoundException, PriceChangedException, InconsistencyCartException {
         if(!userRepository.existsByUsername(Utils.getUsername())) throw new UserNotFoundException();
         User u = userRepository.findByUsername(Utils.getUsername()).get(0);
+        Cart cart = u.getCart();
+
+        if(cart.getProductsInPurchase().size() != pipDetailsList.size()) throw new InconsistencyCartException("INCONSISTENCY_CART_TRY_LATER"); // Un utente da un altro dispositivo ha provato a modificare i prodotti nel carrello mentre un altro sta procedendo con l'acquisto
         Purchase purchase = new Purchase();
         purchase.setBuyer(u);
         purchase.setPurchaseTime(new Date(System.currentTimeMillis()));
@@ -55,8 +50,10 @@ public class PurchasingService {
         purchaseRepository.save(purchase);
 
         for(PipDetails pipDetails : pipDetailsList){
+            Optional<ProductInPurchase> pipFinded = productInPurchaseRepository.findById(pipDetails.getId());
+            if(pipFinded.isEmpty()) throw new InconsistencyCartException("PRODUCT_"+pipDetails.getPid()+"_NOT_EXIST_TRY_LATER");
             Optional<Product> p = productRepository.findById(pipDetails.getPid());
-            if(p.isEmpty()) throw new IllegalArgumentException("Prodotto con id "+pipDetails.getPid()+" non esistente");
+            if(p.isEmpty()) throw new IllegalArgumentException("PRODUCT_"+pipDetails.getPid()+"_NOT_EXIST");
             Product product = p.get();
             if(product.getQuantity() < pipDetails.getQta()) throw new QuantityProductUnavailableException(product.getId());
             if(product.getPrice() != pipDetails.getPrice()) throw new PriceChangedException(product.getId());
@@ -69,6 +66,10 @@ public class PurchasingService {
             productInPurchaseRepository.save(pip);
             purchase.getProductsInPurchase().add(pip);
             product.setQuantity(product.getQuantity() - pip.getQuantity());
+
+            // Procedo con la rimozione del vecchio pip che era nel carrello
+            cart.getProductsInPurchase().remove(pipFinded.get());
+            productInPurchaseRepository.delete(pipFinded.get());
         }
 
         return purchase;

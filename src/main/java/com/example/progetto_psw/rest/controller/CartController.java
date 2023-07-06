@@ -18,7 +18,8 @@ public class CartController {
     CartService cartService;
 
     /**
-     * Attenzione: il carrello per un relativo utente viene creato nel momento in cui aggiunge il primo prodotto
+     * Attenzione: il carrello per un relativo utente viene creato nel momento in cui aggiunge il primo prodotto.
+     * Prima di procedere con l'acquisto faccio sempre ricaricare il carrello in modo da diminuire eventuali eccezioni sollevate.
      */
     @PreAuthorize("hasAuthority('user')")
     @GetMapping("/get")

@@ -15,6 +15,8 @@ import lombok.ToString;
 @EqualsAndHashCode
 @ToString
 public class PipDetails {
+
+    private int id;
     private int pid;
     private int qta;
     private float price;

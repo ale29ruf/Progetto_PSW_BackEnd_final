@@ -29,6 +29,9 @@ public class PurchasingController {
     private PurchasingService purchasingService;
     final int MAX_TENTATIVE = 5;
 
+    /**
+     * Consento solo agli utenti loggati di effettuare acquisti
+     */
     @PreAuthorize("hasAuthority('user')")
     @PostMapping
     @ResponseStatus(code = HttpStatus.OK)
@@ -52,6 +55,8 @@ public class PurchasingController {
             return new ResponseEntity<>(new ResponseMessage("USERNAME_NOT_FOUND"),HttpStatus.BAD_REQUEST);
         } catch (PriceChangedException e){
             return new ResponseEntity<>(new ResponseMessage("PRODUCT_"+e.getPid()+"_PRICE_UNAVAILABLE"),HttpStatus.BAD_REQUEST);
+        } catch (InconsistencyCartException e) {
+            return new ResponseEntity<>(new ResponseMessage(e.getMsg()),HttpStatus.BAD_REQUEST);
         } catch (ValidationFailed e){
             return new ResponseEntity<>(new ResponseMessage("VALIDATION_FAILED_CHECK_DATA"),HttpStatus.OK);
         } catch (ConstraintViolationException e){ // l'eccezione viene sollevata nel caso in cui si prova a inserire un prodotto che non rispetta i vincoli sugli attributi

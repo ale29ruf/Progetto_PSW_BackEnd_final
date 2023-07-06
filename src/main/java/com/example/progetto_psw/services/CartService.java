@@ -37,7 +37,16 @@ public class CartService {
         List<User> result = userRepository.findByUsername(Utils.getUsername());
         if(result.isEmpty()) throw new UserNotFoundException();
         User u = result.get(0);
-        return cartRepository.findByUser(u);
+        Cart cart = cartRepository.findByUser(u);
+        if(cart != null){ // L'utente potrebbe non aver mai aggiunto qualcosa nel carrello
+            for(ProductInPurchase pip : cart.getProductsInPurchase()){
+                Product p = pip.getProduct();
+                pip.setPrice(p.getPrice());
+                if(pip.getQuantity() > p.getQuantity())
+                    pip.setQuantity(p.getQuantity());
+            }
+        }
+        return cart;
     }
 
     @Transactional(readOnly = false, propagation = Propagation.NESTED,
