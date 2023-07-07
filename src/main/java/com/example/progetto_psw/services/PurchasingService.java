@@ -8,9 +8,13 @@ import com.example.progetto_psw.repositories.ProductRepository;
 import com.example.progetto_psw.repositories.PurchaseRepository;
 import com.example.progetto_psw.repositories.UserRepository;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
+import jakarta.persistence.OptimisticLockException;
 import jakarta.validation.Valid;
+import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import support.PipDetails;
@@ -33,10 +37,12 @@ public class PurchasingService {
     private UserRepository userRepository;
     @Autowired
     private ProductRepository productRepository;
+    @Autowired
+    private EntityManager entityManager;
 
 
-    @Transactional(readOnly = false, propagation = Propagation.NESTED,
-            rollbackFor = {QuantityProductUnavailableException.class,UserNotFoundException.class,PriceChangedException.class,InconsistencyCartException.class})
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW,
+            rollbackFor = {QuantityProductUnavailableException.class,UserNotFoundException.class,PriceChangedException.class,InconsistencyCartException.class, OptimisticLockException.class})
     public Purchase addPurchase(@Valid List<PipDetails> pipDetailsList) throws QuantityProductUnavailableException, UserNotFoundException, PriceChangedException, InconsistencyCartException {
         if(!userRepository.existsByUsername(Utils.getUsername())) throw new UserNotFoundException();
         User u = userRepository.findByUsername(Utils.getUsername()).get(0);
@@ -78,7 +84,7 @@ public class PurchasingService {
         return purchase;
     }
 
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(readOnly = true, propagation = Propagation.NESTED, isolation = Isolation.READ_COMMITTED, rollbackFor = {UserNotFoundException.class})
     public List<Purchase> getPurchasesByUser() throws UserNotFoundException {
         if ( !userRepository.existsByUsername(Utils.getUsername()) ) {
             throw new UserNotFoundException();
@@ -87,8 +93,8 @@ public class PurchasingService {
         return purchaseRepository.findByBuyer(u);
     }
 
-    @Transactional(propagation = Propagation.REQUIRED)
-    public List<Purchase> getPurchasesByUserInPeriod(User user, Date startDate, Date endDate) throws UserNotFoundException, DateWrongRangeException {
+    @Transactional(readOnly = true, propagation = Propagation.NESTED, isolation = Isolation.READ_COMMITTED, rollbackFor = {UserNotFoundException.class, DateWrongRangeException.class})
+    public List<Purchase> getPurchasesByUserInPeriod(@NonNull User user, Date startDate, Date endDate) throws UserNotFoundException, DateWrongRangeException {
         if ( !userRepository.existsByUsername(user.getUsername()) ) {
             throw new UserNotFoundException();
         }
@@ -99,7 +105,7 @@ public class PurchasingService {
         return purchaseRepository.findByBuyerInPeriod(startDate, endDate, u);
     }
 
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(readOnly = true, propagation = Propagation.NESTED, isolation = Isolation.READ_COMMITTED)
     public List<Purchase> getAllPurchases() {
         return purchaseRepository.findAll();
     }

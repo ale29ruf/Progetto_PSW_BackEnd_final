@@ -18,6 +18,9 @@ public class AccountingService {
     @Autowired
     private UserRepository userRepository;
 
+    /**
+     * Per la registrazione di un nuovo utente di utilizza il controller di keycloak e non questo.
+     */
 
     //registra un nuovo utente
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)

@@ -3,6 +3,7 @@ package com.example.progetto_psw.services.keycloakservice;
 import com.example.progetto_psw.entities.User;
 import com.example.progetto_psw.repositories.UserRepository;
 import com.example.progetto_psw.services.AccountingService;
+import jakarta.persistence.EntityManager;
 import org.keycloak.admin.client.CreatedResponseUtil;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.RealmResource;
@@ -18,10 +19,7 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import support.Costants;
-import support.exceptions.MailUserAlreadyExistsException;
-import support.exceptions.QuantityProductUnavailableException;
-import support.exceptions.UserNotFoundException;
-import support.exceptions.UsernameUserAlreadyExistsException;
+import support.exceptions.*;
 import support.keyclock.KeycloakAccess;
 
 import javax.ws.rs.core.Response;
@@ -33,15 +31,16 @@ public class KeycloackService {
 
     @Autowired
     UserRepository userRepository;
-
     @Autowired
     AccountingService accountingService;
+    @Autowired
+    EntityManager entityManager;
 
     private final String role = "user";
 
-    @Transactional(readOnly = false, isolation = Isolation.REPEATABLE_READ, propagation = Propagation.REQUIRED,
-            rollbackFor = {QuantityProductUnavailableException.class, UserNotFoundException.class, Exception.class})
-    public User addUser(User userE) throws UsernameUserAlreadyExistsException, MailUserAlreadyExistsException {
+    @Transactional(readOnly = false, isolation = Isolation.READ_COMMITTED, propagation = Propagation.REQUIRED,
+            rollbackFor = {MailUserAlreadyExistsException.class, UsernameUserAlreadyExistsException.class, Exception.class, UserConflitException.class})
+    public User addUser(User userE) throws UsernameUserAlreadyExistsException, MailUserAlreadyExistsException, UserConflitException {
         String email = userE.getEmail();
         String userName = userE.getUsername();
         String password = userE.getPassword();
@@ -55,7 +54,13 @@ public class KeycloackService {
             throw new UsernameUserAlreadyExistsException();
         }
 
-        User u = userRepository.save(userE);
+        User u = null;
+        try{
+            u = userRepository.save(userE);
+        } catch(Exception e){
+            throw new UserConflitException();
+        }
+
 
         Keycloak keycloak = KeycloakAccess.KEYCLOAK_ACCESS.getKeycloak();
 

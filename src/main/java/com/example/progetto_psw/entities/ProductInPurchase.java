@@ -56,6 +56,11 @@ public class ProductInPurchase {
     @JsonIgnore
     private Cart cart;
 
+    @Version
+    @Column(name = "version", nullable = false)
+    @JsonIgnore
+    private long version;
+
     public ProductInPurchase(Product product, int quantity){
         this.product = product;
         this.quantity = quantity;

@@ -37,6 +37,8 @@ public class ProductsController {
             return new ResponseEntity<>(new ResponseMessage("NAME_ALREADY_EXIST"), HttpStatus.BAD_REQUEST);
         } catch (ValidationFailed e) {
             return new ResponseEntity<>(new ResponseMessage("VALIDATION_FAILED_CHECK_DATA"), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(new ResponseMessage("PRODUCT_ALREADY_EXIST"), HttpStatus.OK);
         }
         return new ResponseEntity<>(p, HttpStatus.OK);
     }

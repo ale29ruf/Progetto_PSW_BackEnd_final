@@ -2,6 +2,7 @@ package com.example.progetto_psw.services;
 
 import com.example.progetto_psw.entities.Product;
 import com.example.progetto_psw.repositories.ProductRepository;
+import jakarta.persistence.OptimisticLockException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -24,12 +25,8 @@ public class ProductService {
     @Autowired
     private ProductRepository productRepository;
 
-
-    /**
-     * Usando Isolation.REPEATABLE_READ evito che possano essere inseriti due prodotti contemporaneamente che hanno lo stesso barCode o name (lock sull'intera query)
-     */
     @Transactional(readOnly = false, rollbackFor = {BarCodeAlreadyExistException.class, NameProductAlreadyExistException.class},
-            isolation = Isolation.REPEATABLE_READ)
+            isolation = Isolation.READ_COMMITTED)
     public Product addProduct(Product product) throws BarCodeAlreadyExistException, NameProductAlreadyExistException {
         if(product.getBarCode() == null || product.getName() == null )
             throw new ValidationFailed();
@@ -42,7 +39,7 @@ public class ProductService {
         return productRepository.save(product);
     }
 
-    @Transactional(readOnly = false)
+    @Transactional(readOnly = false, isolation = Isolation.READ_COMMITTED, rollbackFor = {ValidationFailed.class, OptimisticLockException.class})
     public void updateQtProduct(int idProduct, int qnt) {
         Optional<Product> result = productRepository.findById(idProduct);
         if(result.isEmpty() || qnt <= 0)
@@ -52,13 +49,13 @@ public class ProductService {
         p.setQuantity(oldQnt+qnt);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = true, isolation = Isolation.READ_COMMITTED)
     public List<Product> showAllProducts() {
         return productRepository.findAll();
     }
 
     //Restituisce tutti i prodotti paginati
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = true, isolation = Isolation.READ_COMMITTED)
     public List<Product> showAllProducts(int pageNumber, int pageSize, String sortBy) {
         Pageable paging = PageRequest.of(pageNumber, pageSize, Sort.by(sortBy)); //costruzione dell'oggetto pageable
         Page<Product> pagedResult = productRepository.findAll(paging);

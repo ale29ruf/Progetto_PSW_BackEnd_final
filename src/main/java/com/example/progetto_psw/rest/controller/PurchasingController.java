@@ -30,7 +30,9 @@ public class PurchasingController {
     final int MAX_TENTATIVE = 5;
 
     /**
-     * Consento solo agli utenti loggati di effettuare acquisti
+     * Consento solo agli utenti loggati di effettuare acquisti.
+     * ATTENZIONE: Se si sta processando un acquisto c'è la possibilità che un nuovo prodotto venga aggiunto al carrello. Tuttavia
+     * non è un problema tanto non viene considerato nell'acquisto attuale. Magari nel successivo.
      */
     @PreAuthorize("hasAuthority('user')")
     @PostMapping
@@ -57,8 +59,6 @@ public class PurchasingController {
             return new ResponseEntity<>(new ResponseMessage("PRODUCT_"+e.getPid()+"_PRICE_UNAVAILABLE"),HttpStatus.BAD_REQUEST);
         } catch (InconsistencyCartException e) {
             return new ResponseEntity<>(new ResponseMessage(e.getMsg()),HttpStatus.BAD_REQUEST);
-        } catch (ValidationFailed e){
-            return new ResponseEntity<>(new ResponseMessage("VALIDATION_FAILED_CHECK_DATA"),HttpStatus.OK);
         } catch (ConstraintViolationException e){ // l'eccezione viene sollevata nel caso in cui si prova a inserire un prodotto che non rispetta i vincoli sugli attributi
             return new ResponseEntity<>(new ResponseMessage("INTERNAL_ERROR_TRY_LATER"),HttpStatus.OK); //Per precauzione
         }
