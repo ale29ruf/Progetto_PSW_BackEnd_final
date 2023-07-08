@@ -1,7 +1,6 @@
 package com.example.progetto_psw.rest.controller;
 
 import com.example.progetto_psw.entities.Cart;
-import com.example.progetto_psw.entities.Product;
 import com.example.progetto_psw.services.CartService;
 import jakarta.persistence.OptimisticLockException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,13 +29,11 @@ public class CartController {
     @PreAuthorize("hasAuthority('user')")
     @GetMapping("/get")
     public ResponseEntity getCart(){
-        Cart cart;
         int i = 0;
         try{
             while(i < MAX_TENTATIVE){
                 try{
-                    cart = cartService.getCart();
-                    return new ResponseEntity<>(cart, HttpStatus.OK);
+                    return new ResponseEntity<>(cartService.getCart(), HttpStatus.OK);
                 } catch(OptimisticLockException e){
                     i++;
                 }
@@ -61,7 +58,7 @@ public class CartController {
             while(i < MAX_TENTATIVE){
                 try{
                     cartService.addProduct(idProd);
-                    return new ResponseEntity<>("OK", HttpStatus.OK);
+                    return new ResponseEntity<>(new ResponseMessage("OK"), HttpStatus.OK);
                 } catch(OptimisticLockException e){
                     i++;
                 }
@@ -82,7 +79,7 @@ public class CartController {
             while(i < MAX_TENTATIVE){
                 try{
                     cartService.addAllProduct(listaProd);
-                    return new ResponseEntity<>("OK", HttpStatus.OK);
+                    return new ResponseEntity<>(new ResponseMessage("OK"), HttpStatus.OK);
                 } catch(OptimisticLockException e){
                     i++;
                 }
@@ -101,7 +98,7 @@ public class CartController {
         try{
             cartService.removeProduct(idProd);
         } catch (IllegalArgumentException e){
-            return new ResponseEntity<>(new ResponseMessage("PRODUCT_DOESNT_EXIST"),HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ResponseMessage("PRODUCT_IN_PURCHASE_NOT_EXIST_IN_CART"),HttpStatus.BAD_REQUEST);
         } catch (UserNotFoundException e){
             return new ResponseEntity<>(new ResponseMessage("USERNAME_NOT_FOUND"),HttpStatus.BAD_REQUEST);
         }
@@ -130,7 +127,7 @@ public class CartController {
             while(i < MAX_TENTATIVE){
                 try{
                     cartService.plusQntProduct(idProd);
-                    return new ResponseEntity<>("OK", HttpStatus.OK);
+                    return new ResponseEntity<>(new ResponseMessage("OK"), HttpStatus.OK);
                 } catch(OptimisticLockException e){
                     i++;
                 }
@@ -151,7 +148,7 @@ public class CartController {
             while(i < MAX_TENTATIVE){
                 try{
                     cartService.minusQntProduct(idProd);
-                    return new ResponseEntity<>("OK", HttpStatus.OK);
+                    return new ResponseEntity<>(new ResponseMessage("OK"), HttpStatus.OK);
                 } catch(OptimisticLockException e){
                     i++;
                 }

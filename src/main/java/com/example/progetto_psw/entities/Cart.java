@@ -21,6 +21,7 @@ public class Cart {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
+    @JsonIgnore // informazione inutile da far passare al client
     private int id;
 
     @OneToOne(mappedBy = "cart", cascade = {CascadeType.REFRESH})

@@ -47,8 +47,6 @@ public class ProductInPurchase {
     @ManyToOne()
     @JoinColumn(name = "product")
     @Nonnull
-    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
-    @JsonIdentityReference(alwaysAsId = true)
     private Product product;
 
     @ManyToOne()

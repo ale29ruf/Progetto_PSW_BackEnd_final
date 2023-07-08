@@ -17,15 +17,15 @@ import lombok.ToString;
 public class PipDetails {
 
     private int id;
-    private int pid;
-    private int qta;
+    private int product;
+    private int quantity;
     private float price;
 
     public PipDetails() {}
 
-    public PipDetails(int pid, int qta, float price) {
-        this.pid = pid;
-        this.qta = qta;
+    public PipDetails(int product, int quantity, float price) {
+        this.product = product;
+        this.quantity = quantity;
         this.price = price;
     }
 

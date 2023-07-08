@@ -37,8 +37,6 @@ public class PurchasingService {
     private UserRepository userRepository;
     @Autowired
     private ProductRepository productRepository;
-    @Autowired
-    private EntityManager entityManager;
 
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW,
@@ -57,15 +55,15 @@ public class PurchasingService {
 
         for(PipDetails pipDetails : pipDetailsList){
             Optional<ProductInPurchase> pipFinded = productInPurchaseRepository.findById(pipDetails.getId());
-            if(pipFinded.isEmpty() || pipFinded.get().getProduct().getId() != pipDetails.getPid()) throw new InconsistencyCartException("PRODUCT_IN_CART_"+pipDetails.getId()+"_NOT_EXIST_TRY_LATER");
-            Optional<Product> p = productRepository.findById(pipDetails.getPid());
-            if(p.isEmpty()) throw new IllegalArgumentException("PRODUCT_"+pipDetails.getPid()+"_NOT_EXIST");
+            if(pipFinded.isEmpty() || pipFinded.get().getProduct().getId() != pipDetails.getProduct()) throw new InconsistencyCartException("PRODUCT_IN_CART_"+pipDetails.getId()+"_NOT_EXIST_TRY_LATER");
+            Optional<Product> p = productRepository.findById(pipDetails.getProduct());
+            if(p.isEmpty()) throw new IllegalArgumentException("PRODUCT_"+pipDetails.getProduct()+"_NOT_EXIST");
             Product product = p.get();
-            if(product.getQuantity() < pipDetails.getQta()) throw new QuantityProductUnavailableException(product.getId());
+            if(product.getQuantity() < pipDetails.getQuantity()) throw new QuantityProductUnavailableException(product.getId());
             if(product.getPrice() != pipDetails.getPrice()) throw new PriceChangedException(product.getId());
-            if(pipDetails.getQta() > 0){ // Se la quantità del prodotto nel carrello è nulla allora viene ignorato nell'acquisto. Tuttavia lo faccio rimanere nel carrello così se torna disponibile può essere acquistato
+            if(pipDetails.getQuantity() > 0){ // Se la quantità del prodotto nel carrello è nulla allora viene ignorato nell'acquisto. Tuttavia lo faccio rimanere nel carrello così se torna disponibile può essere acquistato
                 ProductInPurchase pip = new ProductInPurchase();
-                pip.setQuantity(pipDetails.getQta());
+                pip.setQuantity(pipDetails.getQuantity());
                 pip.setPrice(pipDetails.getPrice());
                 pip.setPurchase(purchase);
                 pip.setProduct(product);

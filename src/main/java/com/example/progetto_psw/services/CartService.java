@@ -41,7 +41,7 @@ public class CartService {
      */
     @Transactional(readOnly = false, propagation = Propagation.NESTED,
             rollbackFor = {UserNotFoundException.class, OptimisticLockException.class}, isolation = Isolation.READ_COMMITTED)
-    public Cart getCart() throws UserNotFoundException{
+    public List<ProductInPurchase> getCart() throws UserNotFoundException{
         List<User> result = userRepository.findByUsername(Utils.getUsername());
         if(result.isEmpty()) throw new UserNotFoundException();
         User u = result.get(0);
@@ -54,7 +54,7 @@ public class CartService {
                     pip.setQuantity(p.getQuantity());
             }
         }
-        return cart;
+        return cart != null? cart.getProductsInPurchase() : new LinkedList<>();
     }
 
     /**
@@ -112,7 +112,7 @@ public class CartService {
         }
 
         for(PipDetails pipDetails : listaProd){
-            Optional<Product> p = productRepository.findById(pipDetails.getPid());
+            Optional<Product> p = productRepository.findById(pipDetails.getProduct());
             if(p.isEmpty()) throw new IllegalArgumentException();
             Product product = p.get();
 
@@ -125,7 +125,7 @@ public class CartService {
             if(!exist) {
                 ProductInPurchase pip = new ProductInPurchase();
                 pip.setProduct(product);
-                pip.setQuantity(pipDetails.getQta());
+                pip.setQuantity(pipDetails.getQuantity());
                 pip.setPrice(product.getPrice());
                 pip.setCart(cart);
                 cart.getProductsInPurchase().add(pip);
@@ -140,7 +140,7 @@ public class CartService {
         List<User> result = userRepository.findByUsername(Utils.getUsername());
         if(result.isEmpty()) throw new UserNotFoundException();
         Optional<ProductInPurchase> pip = productInPurchaseRepository.findById(idProdInP);
-        if(pip.isEmpty()) throw new IllegalArgumentException("PRODUCT_IN_PURCHASE_NOT_EXIST_IN_CART");
+        if(pip.isEmpty()) throw new IllegalArgumentException();
         Cart cart = pip.get().getCart();
         cart.getProductsInPurchase().remove(pip.get()); // cartRepository.save(cart); inutile dato che è gia' in stato managed
         productInPurchaseRepository.delete(pip.get());
