@@ -118,9 +118,10 @@ public class CartService {
 
             boolean exist = false;
             for(ProductInPurchase productInPurchase : cart.getProductsInPurchase()){
-                if(productInPurchase.getProduct().getId() == product.getId())
+                if (productInPurchase.getProduct().getId() == product.getId()) {
                     exist = true;
-                if(exist) break;
+                    break;
+                }
             }
             if(!exist) {
                 ProductInPurchase pip = new ProductInPurchase();

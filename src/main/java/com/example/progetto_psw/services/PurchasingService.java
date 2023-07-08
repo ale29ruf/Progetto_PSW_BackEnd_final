@@ -46,7 +46,7 @@ public class PurchasingService {
         User u = userRepository.findByUsername(Utils.getUsername()).get(0);
         Cart cart = u.getCart();
 
-        if(cart.getProductsInPurchase().size() != pipDetailsList.size()) throw new InconsistencyCartException("INCONSISTENCY_CART_TRY_LATER"); // Un utente da un altro dispositivo ha provato a modificare i prodotti nel carrello mentre un altro sta procedendo con l'acquisto
+        if(cart.getProductsInPurchase().size() != pipDetailsList.size()) throw new InconsistencyCartException("PRODUCT_ARE_INCONSISTENCY_IN_CART_TRY_LATER"); // Un utente da un altro dispositivo ha provato a modificare i prodotti nel carrello mentre un altro sta procedendo con l'acquisto
         Purchase purchase = new Purchase();
         purchase.setBuyer(u);
         purchase.setPurchaseTime(new Date(System.currentTimeMillis()));
@@ -55,12 +55,12 @@ public class PurchasingService {
 
         for(PipDetails pipDetails : pipDetailsList){
             Optional<ProductInPurchase> pipFinded = productInPurchaseRepository.findById(pipDetails.getId());
-            if(pipFinded.isEmpty() || pipFinded.get().getProduct().getId() != pipDetails.getProduct()) throw new InconsistencyCartException("PRODUCT_IN_CART_"+pipDetails.getId()+"_NOT_EXIST_TRY_LATER");
+            if(pipFinded.isEmpty() || pipFinded.get().getProduct().getId() != pipDetails.getProduct()) throw new InconsistencyCartException("PRODUCT_"+pipDetails.getId()+"_IN_CART_NOT_EXIST_TRY_LATER");
             Optional<Product> p = productRepository.findById(pipDetails.getProduct());
-            if(p.isEmpty()) throw new IllegalArgumentException("PRODUCT_"+pipDetails.getProduct()+"_NOT_EXIST");
+            if(p.isEmpty()) throw new IllegalArgumentException("PRODUCT_"+pipFinded.get().getProduct()+"_NOT_EXIST");
             Product product = p.get();
-            if(product.getQuantity() < pipDetails.getQuantity()) throw new QuantityProductUnavailableException(product.getId());
-            if(product.getPrice() != pipDetails.getPrice()) throw new PriceChangedException(product.getId());
+            if(product.getQuantity() < pipDetails.getQuantity()) throw new QuantityProductUnavailableException(product.getName());
+            if(product.getPrice() != pipDetails.getPrice()) throw new PriceChangedException(product.getName());
             if(pipDetails.getQuantity() > 0){ // Se la quantità del prodotto nel carrello è nulla allora viene ignorato nell'acquisto. Tuttavia lo faccio rimanere nel carrello così se torna disponibile può essere acquistato
                 ProductInPurchase pip = new ProductInPurchase();
                 pip.setQuantity(pipDetails.getQuantity());

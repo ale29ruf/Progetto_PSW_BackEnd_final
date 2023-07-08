@@ -50,13 +50,13 @@ public class PurchasingController {
                 }
             }
         } catch (QuantityProductUnavailableException e) {
-            return new ResponseEntity<>(new ResponseMessage("PRODUCT_"+e.getPid()+"_QUANTITY_UNAVAILABLE"), HttpStatus.BAD_REQUEST); // Realmente il messaggio dovrebbe essrere più esplicativo (es. specificare il prodotto di cui non vi è disponibilità)
+            return new ResponseEntity<>(new ResponseMessage("PRODUCT_"+e.getName()+"_QUANTITY_UNAVAILABLE"), HttpStatus.BAD_REQUEST); // Realmente il messaggio dovrebbe essrere più esplicativo (es. specificare il prodotto di cui non vi è disponibilità)
         } catch (IllegalArgumentException e){
             return new ResponseEntity<>(new ResponseMessage(e.getMessage()),HttpStatus.BAD_REQUEST);
         } catch (UserNotFoundException e){
             return new ResponseEntity<>(new ResponseMessage("USERNAME_NOT_FOUND"),HttpStatus.BAD_REQUEST);
         } catch (PriceChangedException e){
-            return new ResponseEntity<>(new ResponseMessage("PRODUCT_"+e.getPid()+"_PRICE_UNAVAILABLE"),HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ResponseMessage("PRODUCT_"+e.getName()+"_PRICE_UNAVAILABLE"),HttpStatus.BAD_REQUEST);
         } catch (InconsistencyCartException e) {
             return new ResponseEntity<>(new ResponseMessage(e.getMsg()),HttpStatus.BAD_REQUEST);
         } catch (ConstraintViolationException e){ // l'eccezione viene sollevata nel caso in cui si prova a inserire un prodotto che non rispetta i vincoli sugli attributi

@@ -1,14 +1,14 @@
 package support.exceptions;
 
 public class PriceChangedException extends Exception{
-    private int pid;
+    private final String nameProd;
 
-    public int getPid() {
-        return pid;
+    public String getName() {
+        return nameProd;
     }
 
-    public PriceChangedException(int pid) {
+    public PriceChangedException(String nameProd) {
         super();
-        this.pid = pid;
+        this.nameProd = nameProd;
     }
 }

@@ -3,14 +3,14 @@ package support.exceptions;
 
 public class QuantityProductUnavailableException extends Exception {
 
-    private int pid;
-    public int getPid() {
-        return pid;
+    private final String nomeProd;
+    public String getName() {
+        return nomeProd;
     }
 
-    public QuantityProductUnavailableException(int pid) {
+    public QuantityProductUnavailableException(String name) {
         super();
-        this.pid = pid;
+        nomeProd = name;
     }
 
 }
