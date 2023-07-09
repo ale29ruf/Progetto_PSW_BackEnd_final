@@ -68,9 +68,15 @@ public class PurchasingController {
 
     @PreAuthorize("hasAuthority('user')")
     @GetMapping("/purchases")
-    public ResponseEntity getPurchases() {
+    public ResponseEntity getPurchases(@RequestParam(value = "pageNumber", defaultValue = "0") int pageNumber,
+                                       @RequestParam(value = "pageSize", defaultValue = "10") int pageSize,
+                                       @RequestParam(value = "sortBy", defaultValue = "id") String sortBy) {
         try {
-            return new ResponseEntity<>(purchasingService.getPurchasesByUser(), HttpStatus.OK);
+            List<Purchase> result = purchasingService.getPurchasesByUser(pageNumber,pageSize,sortBy);
+            if (result.size() == 0) {
+                return new ResponseEntity<>(new ResponseMessage("NO_RESULT"), HttpStatus.OK);
+            }
+            return new ResponseEntity<>(result, HttpStatus.OK);
         } catch (UserNotFoundException e) {
             return new ResponseEntity<>(new ResponseMessage("USER_NOT_FOUND"), HttpStatus.BAD_REQUEST);
         }

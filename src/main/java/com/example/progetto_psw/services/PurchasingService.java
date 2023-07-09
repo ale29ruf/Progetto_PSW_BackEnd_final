@@ -13,6 +13,10 @@ import jakarta.persistence.OptimisticLockException;
 import jakarta.validation.Valid;
 import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
@@ -21,10 +25,7 @@ import support.PipDetails;
 import support.authentication.Utils;
 import support.exceptions.*;
 
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @Transactional(readOnly = true)
@@ -83,12 +84,19 @@ public class PurchasingService {
     }
 
     @Transactional(readOnly = true, propagation = Propagation.NESTED, isolation = Isolation.READ_COMMITTED, rollbackFor = {UserNotFoundException.class})
-    public List<Purchase> getPurchasesByUser() throws UserNotFoundException {
+    public List<Purchase> getPurchasesByUser(int pageNumber, int pageSize,String sortBy) throws UserNotFoundException {
         if ( !userRepository.existsByUsername(Utils.getUsername()) ) {
             throw new UserNotFoundException();
         }
         User u = userRepository.findByUsername(Utils.getUsername()).get(0);
-        return purchaseRepository.findByBuyer(u);
+        Pageable paging = PageRequest.of(pageNumber, pageSize, Sort.by(sortBy));
+        Page<Purchase> pagedResult = purchaseRepository.findAllByBuyer(u,paging);
+        if ( pagedResult.hasContent() ) {
+            return pagedResult.getContent();
+        }
+        else {
+            return new ArrayList<>();
+        }
     }
 
     @Transactional(readOnly = true, propagation = Propagation.NESTED, isolation = Isolation.READ_COMMITTED, rollbackFor = {UserNotFoundException.class, DateWrongRangeException.class})

@@ -18,7 +18,6 @@ import java.util.stream.Collectors;
 @Log4j2
 public class Utils {
 
-    private static String CLIENT_NAME = "server-store";
 
     public Jwt getPrincipal() {
         return (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
