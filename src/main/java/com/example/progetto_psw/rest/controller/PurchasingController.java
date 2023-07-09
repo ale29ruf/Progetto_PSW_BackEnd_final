@@ -83,13 +83,11 @@ public class PurchasingController {
     }
 
     @PreAuthorize("hasAuthority('user')")
-    @GetMapping("/{user}/{startDate}/{endDate}")
-    public ResponseEntity getPurchasesInPeriod(@PathVariable("startDate") @DateTimeFormat(pattern = "dd-MM-yyyy") Date start,
-                                               @PathVariable("endDate") @DateTimeFormat(pattern = "dd-MM-yyyy") Date end) {
+    @GetMapping("/purchases/date")
+    public ResponseEntity getPurchasesInPeriod(@RequestParam(value = "startDate", required = true) @DateTimeFormat(pattern = "dd-MM-yyyy")  Date start,
+                                               @RequestParam(value = "endDate", required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") Date end) {
         try {
-            User u = new User();
-            u.setUsername(Utils.getUsername());
-            List<Purchase> result = purchasingService.getPurchasesByUserInPeriod(u, start, end);
+            List<Purchase> result = purchasingService.getPurchasesByUserInPeriod(start, end);
             if ( result.size() <= 0 ) {
                 return new ResponseEntity<>(new ResponseMessage("NO_RESULT"), HttpStatus.OK);
             }

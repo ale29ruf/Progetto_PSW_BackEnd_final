@@ -100,14 +100,14 @@ public class PurchasingService {
     }
 
     @Transactional(readOnly = true, propagation = Propagation.NESTED, isolation = Isolation.READ_COMMITTED, rollbackFor = {UserNotFoundException.class, DateWrongRangeException.class})
-    public List<Purchase> getPurchasesByUserInPeriod(@NonNull User user, Date startDate, Date endDate) throws UserNotFoundException, DateWrongRangeException {
-        if ( !userRepository.existsByUsername(user.getUsername()) ) {
+    public List<Purchase> getPurchasesByUserInPeriod(Date startDate, Date endDate) throws UserNotFoundException, DateWrongRangeException {
+        if ( !userRepository.existsByUsername(Utils.getUsername()) ) {
             throw new UserNotFoundException();
         }
         if ( startDate.compareTo(endDate) >= 0 ) {
             throw new DateWrongRangeException();
         }
-        User u = userRepository.findByUsername(user.getUsername()).get(0);
+        User u = userRepository.findByUsername(Utils.getUsername()).get(0);
         return purchaseRepository.findByBuyerInPeriod(startDate, endDate, u);
     }
 
