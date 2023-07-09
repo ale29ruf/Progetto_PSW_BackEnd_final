@@ -92,9 +92,7 @@ public class CartService {
             pip.setCart(cart);
             cart.getProductsInPurchase().add(pip);
             productInPurchaseRepository.save(pip);
-
         }
-
    }
 
     @Transactional(readOnly = false, propagation = Propagation.NESTED,

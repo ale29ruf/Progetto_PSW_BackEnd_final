@@ -91,12 +91,14 @@ public class PurchasingService {
         User u = userRepository.findByUsername(Utils.getUsername()).get(0);
         Pageable paging = PageRequest.of(pageNumber, pageSize, Sort.by(sortBy));
         Page<Purchase> pagedResult = purchaseRepository.findAllByBuyer(u,paging);
+
         if ( pagedResult.hasContent() ) {
             return pagedResult.getContent();
         }
         else {
             return new ArrayList<>();
         }
+
     }
 
     @Transactional(readOnly = true, propagation = Propagation.NESTED, isolation = Isolation.READ_COMMITTED, rollbackFor = {UserNotFoundException.class, DateWrongRangeException.class})

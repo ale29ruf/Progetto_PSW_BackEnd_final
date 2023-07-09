@@ -26,4 +26,5 @@ public interface PurchaseRepository extends JpaRepository<Purchase, Integer> {
     List<Purchase> findByBuyerInPeriod(Date startDate, Date endDate, User user);
 
     Page<Purchase> findAllByBuyer(User u, Pageable paging);
+
 }

@@ -84,7 +84,7 @@ public class PurchasingController {
 
     @PreAuthorize("hasAuthority('user')")
     @GetMapping("/purchases/date")
-    public ResponseEntity getPurchasesInPeriod(@RequestParam(value = "startDate", required = true) @DateTimeFormat(pattern = "dd-MM-yyyy")  Date start,
+    public ResponseEntity getPurchasesInPeriod(@RequestParam(value = "startDate", required = false) @DateTimeFormat(pattern = "dd-MM-yyyy")  Date start,
                                                @RequestParam(value = "endDate", required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") Date end) {
         try {
             List<Purchase> result = purchasingService.getPurchasesByUserInPeriod(start, end);
