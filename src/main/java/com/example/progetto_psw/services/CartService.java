@@ -81,19 +81,18 @@ public class CartService {
             cart.setUser(u);
             u.setCart(cart);
 
-            pip.setCart(cart);
-            cart.getProductsInPurchase().add(pip);
-            productInPurchaseRepository.save(pip);
         } else {
-            for(ProductInPurchase productInPurchase : cart.getProductsInPurchase()){
+            if(productInPurchaseRepository.existPipInCartByProduct(cart, product).size() == 1)
+                return;
+            /*for(ProductInPurchase productInPurchase : cart.getProductsInPurchase()){
                 if(productInPurchase.getProduct().getId() == product.getId())
                     return;
-            }
-            pip.setCart(cart);
-            cart.getProductsInPurchase().add(pip);
-            productInPurchaseRepository.save(pip);
+            }*/
         }
-   }
+        pip.setCart(cart);
+        cart.getProductsInPurchase().add(pip);
+        productInPurchaseRepository.save(pip);
+    }
 
     @Transactional(readOnly = false, propagation = Propagation.NESTED,
             rollbackFor = {UserNotFoundException.class, OptimisticLockException.class}, isolation = Isolation.READ_COMMITTED)
@@ -114,6 +113,17 @@ public class CartService {
             if(p.isEmpty()) throw new IllegalArgumentException();
             Product product = p.get();
 
+            if(productInPurchaseRepository.existPipInCartByProduct(cart,product).isEmpty()){
+                ProductInPurchase pip = new ProductInPurchase();
+                pip.setProduct(product);
+                pip.setQuantity(pipDetails.getQuantity());
+                pip.setPrice(product.getPrice());
+                pip.setCart(cart);
+                cart.getProductsInPurchase().add(pip);
+                productInPurchaseRepository.save(pip);
+            }
+
+            /*
             boolean exist = false;
             for(ProductInPurchase productInPurchase : cart.getProductsInPurchase()){
                 if (productInPurchase.getProduct().getId() == product.getId()) {
@@ -130,6 +140,8 @@ public class CartService {
                 cart.getProductsInPurchase().add(pip);
                 productInPurchaseRepository.save(pip);
             }
+
+             */
         }
 
     }
