@@ -37,7 +37,7 @@ public class CartService {
     /**
      * Se un prodotto cambia prezzo o quantità allora lo modifico all'interno del carrello.
      * Tuttavia se il prodotto raggiunge quantità nulla allora lo lascio in modo che l'utente possa accorgersi che
-     * quel prodotto non è piu' disponibile. Ovviamente se procede con l'acquisto riceverà un'eccezione.
+     * quel prodotto non è piu' disponibile. Ovviamente se procede con l'acquisto sarà segnalato.
      */
     @Transactional(readOnly = false, propagation = Propagation.NESTED,
             rollbackFor = {UserNotFoundException.class, OptimisticLockException.class}, isolation = Isolation.READ_COMMITTED)
@@ -61,7 +61,7 @@ public class CartService {
      * Vedere nota nel controller.
      */
     @Transactional(readOnly = false, propagation = Propagation.NESTED,
-            rollbackFor = {UserNotFoundException.class, OptimisticLockException.class}, isolation = Isolation.READ_COMMITTED)
+            rollbackFor = {UserNotFoundException.class, OptimisticLockException.class}, isolation = Isolation.SERIALIZABLE)
     public void addProduct(int idProd) throws UserNotFoundException {
         List<User> result = userRepository.findByUsername(Utils.getUsername());
         if(result.isEmpty()) throw new UserNotFoundException();
@@ -82,12 +82,8 @@ public class CartService {
             u.setCart(cart);
 
         } else {
-            if(productInPurchaseRepository.existPipInCartByProduct(cart, product).size() == 1)
+            if(productInPurchaseRepository.existsByCartAndProduct(cart, product))
                 return;
-            /*for(ProductInPurchase productInPurchase : cart.getProductsInPurchase()){
-                if(productInPurchase.getProduct().getId() == product.getId())
-                    return;
-            }*/
         }
         pip.setCart(cart);
         cart.getProductsInPurchase().add(pip);
@@ -95,7 +91,7 @@ public class CartService {
     }
 
     @Transactional(readOnly = false, propagation = Propagation.NESTED,
-            rollbackFor = {UserNotFoundException.class, OptimisticLockException.class}, isolation = Isolation.READ_COMMITTED)
+            rollbackFor = {UserNotFoundException.class, OptimisticLockException.class}, isolation = Isolation.SERIALIZABLE)
     public void addAllProduct(List<PipDetails> listaProd) throws UserNotFoundException {
         List<User> result = userRepository.findByUsername(Utils.getUsername());
         if(result.isEmpty()) throw new UserNotFoundException();
@@ -113,7 +109,7 @@ public class CartService {
             if(p.isEmpty()) throw new IllegalArgumentException();
             Product product = p.get();
 
-            if(productInPurchaseRepository.existPipInCartByProduct(cart,product).isEmpty()){
+            if(!productInPurchaseRepository.existsByCartAndProduct(cart,product)){
                 ProductInPurchase pip = new ProductInPurchase();
                 pip.setProduct(product);
                 pip.setQuantity(pipDetails.getQuantity());
@@ -122,31 +118,11 @@ public class CartService {
                 cart.getProductsInPurchase().add(pip);
                 productInPurchaseRepository.save(pip);
             }
-
-            /*
-            boolean exist = false;
-            for(ProductInPurchase productInPurchase : cart.getProductsInPurchase()){
-                if (productInPurchase.getProduct().getId() == product.getId()) {
-                    exist = true;
-                    break;
-                }
-            }
-            if(!exist) {
-                ProductInPurchase pip = new ProductInPurchase();
-                pip.setProduct(product);
-                pip.setQuantity(pipDetails.getQuantity());
-                pip.setPrice(product.getPrice());
-                pip.setCart(cart);
-                cart.getProductsInPurchase().add(pip);
-                productInPurchaseRepository.save(pip);
-            }
-
-             */
         }
 
     }
 
-    @Transactional(readOnly = false, propagation = Propagation.NESTED, rollbackFor = {UserNotFoundException.class}, isolation = Isolation.READ_COMMITTED)
+    @Transactional(readOnly = false, propagation = Propagation.NESTED, rollbackFor = {UserNotFoundException.class}, isolation = Isolation.SERIALIZABLE)
     public void removeProduct(int idProdInP) throws UserNotFoundException {
         List<User> result = userRepository.findByUsername(Utils.getUsername());
         if(result.isEmpty()) throw new UserNotFoundException();
@@ -157,7 +133,7 @@ public class CartService {
         productInPurchaseRepository.delete(pip.get());
     }
 
-    @Transactional(readOnly = false, propagation = Propagation.NESTED, rollbackFor = {UserNotFoundException.class}, isolation = Isolation.READ_COMMITTED)
+    @Transactional(readOnly = false, propagation = Propagation.NESTED, rollbackFor = {UserNotFoundException.class}, isolation = Isolation.SERIALIZABLE)
     public void removeAllProduct() throws UserNotFoundException {
         List<User> result = userRepository.findByUsername(Utils.getUsername());
         if(result.isEmpty()) throw new UserNotFoundException();

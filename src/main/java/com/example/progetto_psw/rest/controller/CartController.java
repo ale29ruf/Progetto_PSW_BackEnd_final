@@ -1,6 +1,5 @@
 package com.example.progetto_psw.rest.controller;
 
-import com.example.progetto_psw.entities.Cart;
 import com.example.progetto_psw.services.CartService;
 import jakarta.persistence.OptimisticLockException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +23,8 @@ public class CartController {
 
     /**
      * Attenzione: il carrello per un relativo utente viene creato nel momento in cui aggiunge il primo prodotto.
-     * Prima di procedere con l'acquisto faccio sempre ricaricare il carrello in modo da diminuire eventuali eccezioni sollevate.
+     * Prima di procedere con l'acquisto faccio sempre ricaricare il carrello in modo da diminuire eventuali eccezioni sollevate
+     * in fase di acquisto.
      */
     @PreAuthorize("hasAuthority('user')")
     @GetMapping("/get")
@@ -48,7 +48,7 @@ public class CartController {
      * ATTENZIONE: se cerchiamo di aggiungere lo stesso prodotto nello stesso carrello, OptimisticLockException non viene sollevata
      * dato che il responsabile della relazione è ProductInPurchase, dunque non si ha conflitto sulle tuple del carrello.
      * Bisognerebbe, ad esempio, aggiungere una nuova tabella che mantenga la relazione in modo da avere conflitto su quelle
-     * tuple.
+     * tuple oppure rendere il metodo transazionale serializable (poco efficiente).
      */
     @PreAuthorize("hasAuthority('user')")
     @GetMapping("/addProd")
@@ -117,7 +117,7 @@ public class CartController {
     }
 
     /**
-     * Nei seguenti due metodi OptimisticLockException viene sollevata.
+     * Nei seguenti due metodi OptimisticLockException potrebbe essere sollevata perchè si ha conflitto sulle singole tuple di ProductInPurchase.
      */
     @PreAuthorize("hasAuthority('user')")
     @GetMapping("/plusQntProd")

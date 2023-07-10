@@ -14,7 +14,6 @@ import java.util.List;
 @Repository
 public interface ProductInPurchaseRepository extends JpaRepository<ProductInPurchase, Integer> {
 
-    @Query("select pip.product from ProductInPurchase pip where pip.cart = :cart and pip.product = :prod")
-    List<Product> existPipInCartByProduct(Cart cart, Product prod);
+    boolean existsByCartAndProduct(Cart cart, Product prod);
 
 }
